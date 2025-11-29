@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <title>SolveHub – Lista de Exercícios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="app-title">
+            Solve<span>Hub</span>
+        </div>
+
+        <div class="profile">
+            <span class="profile-name">Olá, Afonso</span>
+            <div class="avatar">AA</div>
+
+            <!-- Dropdown -->
+            <div class="profile-dropdown hidden" id="profileMenu">
+                <a href="#" class="dropdown-item">⚙️ Definições</a>
+                <a href="#" class="dropdown-item logout">🚪 Log Out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Body -->
+    <div class="app-body">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="nav-section">
+                <h2>Navegação</h2>
+                <div class="nav-link active"><span>📚</span> Lista de exercícios</div>
+                <div class="nav-link"><span>⭐</span> Os meus favoritos</div>
+                <div class="nav-link"><span>📝</span> Os meus exercícios</div>
+            </div>
+
+            <div class="nav-section">
+                <h2>Disciplinas</h2>
+                <span class="tag-pill">Cálculo</span>
+                <span class="tag-pill">BD</span>
+                <span class="tag-pill">Redes</span>
+                <span class="tag-pill">Sistemas</span>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+            
+            <!-- Header -->
+            <div class="main-header">
+                <div class="main-header-left">
+                    <h1>Página Inicial – Lista de Exercícios</h1>
+                    <p>Explora dúvidas de colegas e participa na resolução colaborativa.</p>
+                </div>
+
+                <div class="main-header-right">
+                    <button class="btn-ghost">Ordenar por mais recentes</button>
+                    <button class="btn-primary">＋ Novo exercício</button>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filters-row">
+                <div class="input-search">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Pesquisar exercícios..." />
+                </div>
+
+                <div class="filter-select">
+                    Filtro: Todas as disciplinas
+                </div>
+            </div>
+
+            <!-- Lista -->
+            <section class="exercise-list">
+
+                <article class="exercise-card">
+                    <div class="exercise-main">
+                        <h3>Calcular derivada de função racional</h3>
+                        <p class="meta">Autor: João | Cálculo</p>
+                        <p class="preview">
+                            Preciso de ajuda para derivar a função (2x³ − 5x + 1) / (x² + 1).
+                        </p>
+                    </div>
+
+                    <div class="exercise-side">
+                        <span class="badge-discipline">Cálculo</span>
+                        <div class="stats-row">
+                            <span class="chip">4 respostas</span>
+                            <span class="chip">12 votos</span>
+                        </div>
+                        <span class="time-label">há 15 min</span>
+                    </div>
+                </article>
+
+            </section>
+
+        </main>
+    </div>
+</div>
+
+<!-- JS externo -->
+<script src="script.js"></script>
+
+</body>
+</html>

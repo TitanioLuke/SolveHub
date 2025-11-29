@@ -1,0 +1,398 @@
+/* ============================================================
+   🔵 1) GLOBAL (teu CSS original para login/registo)
+   ============================================================ */
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #e8ecf5;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Container principal auth */
+.auth-container {
+    width: 950px;
+    height: 550px;
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+    display: flex;
+    overflow: hidden;
+}
+
+/* Lados */
+.side {
+    width: 50%;
+    height: 100%;
+    padding: 60px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* Fundo azul */
+.brand-bg {
+    background: linear-gradient(135deg, #2f54ff, #5271ff);
+    color: #fff;
+}
+
+/* Fundo branco */
+.form-bg {
+    background: #ffffff;
+    color: #111827;
+}
+
+/* Branding */
+.brand-box {
+    max-width: 320px;
+    animation: fadeIn 0.4s ease;
+}
+
+.brand-box h1 {
+    font-size: 44px;
+    margin-bottom: 14px;
+}
+
+.brand-box p {
+    font-size: 18px;
+    opacity: 0.95;
+}
+
+/* Formulários */
+.form-box {
+    max-width: 320px;
+    animation: fadeIn 0.4s ease;
+}
+
+.form-box h2 {
+    font-size: 26px;
+    margin-bottom: 24px;
+}
+
+.form-box input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-box input:focus {
+    border-color: #2f54ff;
+    box-shadow: 0 0 0 1px rgba(47, 84, 255, 0.1);
+}
+
+/* Botão principal */
+.btn-primary {
+    background: #2f54ff;
+    color: white;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 10px;
+    width: fit-content;
+}
+
+.btn-primary:hover {
+    background: #1d3ed8;
+}
+
+/* Link de alternância */
+.switch {
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.link {
+    color: #2f54ff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.hidden { display: none; }
+
+/* Fade */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== PASSWORD RULES ==================== */
+
+/* Estilo para as mensagens de erro */
+.error-message {
+    color: red;
+    margin-top: 8px;
+    min-height: 18px;
+}
+
+/* PASSWORD */
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-password svg {
+    opacity: 0.7;
+    transition: 0.2s;
+}
+
+.toggle-password svg:hover {
+    opacity: 1;
+}
+
+.password-rules {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: red;
+}
+
+.password-rules li {
+    margin-bottom: 4px;
+}
+
+#passwordStatus {
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ============================================================
+   🔵 2) ESTILOS DA PÁGINA PRINCIPAL (exercícios)
+   ============================================================ */
+
+:root {
+  --bg-page: #f4f6fb;
+  --bg-card: #ffffff;
+  --primary: #2563eb;
+  --primary-soft: #e0edff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --border-soft: #e5e7eb;
+  --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --radius-lg: 16px;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 1100px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  overflow: hidden;
+}
+
+/* HEADER */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border-soft);
+  background: linear-gradient(to right, #ffffff, #eff4ff);
+}
+
+.app-title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.app-title span {
+  color: var(--primary);
+}
+
+/* =================== PROFILE (Dropdown) =================== */
+
+.profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.profile-name {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.profile-name:hover {
+  color: var(--primary);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* dropdown */
+.profile-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  width: 150px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+  animation: fadeIn 0.15s ease;
+  padding: 8px 0;
+  z-index: 20;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 10px 14px;
+  font-size: 14px;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+.dropdown-item:hover {
+  background: var(--primary-soft);
+}
+
+.dropdown-item.logout:hover {
+  background: #fdecec;
+  color: #b91c1c;
+}
+
+/* BODY LAYOUT */
+.app-body {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+}
+
+/* Sidebar */
+.sidebar {
+  border-right: 1px solid var(--border-soft);
+  padding: 20px 20px 24px;
+  background: #f9fafb;
+}
+
+.sidebar h2 {
+  font-size: 14px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.nav-link {
+  padding: 8px 10px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+.nav-link.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.tag-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  display: inline-block;
+}
+
+/* Main content */
+.main {
+  padding: 22px 28px 26px;
+  background: var(--bg-page);
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.main-header-left h1 {
+  font-size: 20px;
+}
+
+.btn-primary {
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.btn-ghost {
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: white;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.input-search {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: white;
+  border: 1px solid var(--border-soft);
+  display: flex;
+  gap: 8px;
+}
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.exercise-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+  display: grid;
+  grid-template-columns: 4fr 1.4fr;
+}
+
+/* done */
