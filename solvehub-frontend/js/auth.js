@@ -1,6 +1,4 @@
-/* ----------------------
-   SELETORES
------------------------- */
+/* SELECTORS */
 const leftSide = document.getElementById("leftSide");
 const rightSide = document.getElementById("rightSide");
 
@@ -20,9 +18,9 @@ const API_URL = "http://localhost:5050";
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
-/* ----------------------
-   ALTERAR VISTAS
------------------------- */
+/* ==========================
+    VIEW SWITCHING
+========================== */
 function showLogin() {
     leftSide.classList.add("brand-bg");
     leftSide.classList.remove("form-bg");
@@ -63,52 +61,47 @@ toLogin.addEventListener("click", showLogin);
 showLogin();
 
 
+/* ==========================
+   PASSWORD VALIDATION
+========================== */
 
-/* ============================================================
-   PASSWORD VALIDATION (REGISTO)
-============================================================ */
 const passwordInput = document.getElementById("reg_password");
 const passwordContainer = document.getElementById("passwordContainer");
+
 const statusText = document.getElementById("passwordStatus");
 
 const ruleLength = document.getElementById("rule-length");
 const ruleUpper = document.getElementById("rule-upper");
-const ruleLower = document.getElementById("rule-lower");
 const ruleNumber = document.getElementById("rule-number");
 const ruleSymbol = document.getElementById("rule-symbol");
 
 passwordInput.addEventListener("input", () => {
     const value = passwordInput.value;
 
-    if (value.length > 0) {
-        passwordContainer.classList.remove("hidden");
-    } else {
+    if (value.length === 0) {
         passwordContainer.classList.add("hidden");
         statusText.textContent = "";
+        return;
     }
 
-    const regexLength = /.{8,}/;
-    const regexUpper = /[A-Z]/;
-    const regexLower = /[a-z]/;
-    const regexNumber = /\d/;
-    const regexSymbol = /[\W_]/;
+    passwordContainer.classList.remove("hidden");
 
-    let missing = 0;
+    const validLength = /.{8,}/.test(value);
+    const validUpper = /[A-Z]/.test(value);
+    const validNumber = /\d/.test(value);
+    const validSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(value);
 
-    function checkRule(regex, element) {
-        if (regex.test(value)) {
-            element.style.display = "none";
-        } else {
-            element.style.display = "list-item";
-            missing++;
-        }
-    }
+    ruleLength.style.display = validLength ? "none" : "list-item";
+    ruleUpper.style.display = validUpper ? "none" : "list-item";
+    ruleNumber.style.display = validNumber ? "none" : "list-item";
+    ruleSymbol.style.display = validSymbol ? "none" : "list-item";
 
-    checkRule(regexLength, ruleLength);
-    checkRule(regexUpper, ruleUpper);
-    checkRule(regexLower, ruleLower);
-    checkRule(regexNumber, ruleNumber);
-    checkRule(regexSymbol, ruleSymbol);
+    const missing = [
+        !validLength,
+        !validUpper,
+        !validNumber,
+        !validSymbol
+    ].filter(Boolean).length;
 
     if (missing === 0) {
         statusText.textContent = "✔ Password forte!";
@@ -116,9 +109,6 @@ passwordInput.addEventListener("input", () => {
     } else if (missing === 1) {
         statusText.textContent = "Quase lá… falta 1 requisito.";
         statusText.style.color = "orange";
-    } else if (missing === 2) {
-        statusText.textContent = "Password razoável (faltam 2 requisitos).";
-        statusText.style.color = "#c7a400";
     } else {
         statusText.textContent = "Password fraca (faltam vários requisitos).";
         statusText.style.color = "red";
@@ -126,51 +116,40 @@ passwordInput.addEventListener("input", () => {
 });
 
 
-
-/* ============================================================
-   OLHO PROFISSIONAL – REGISTO
-============================================================ */
+/* ==========================
+   EYE ICON — REGISTER
+========================== */
 const togglePass = document.getElementById("togglePass");
 const eyeIcon = document.getElementById("eyeIcon");
 
 togglePass.addEventListener("click", () => {
-    if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-
-        eyeIcon.setAttribute("fill", "#111");
-    } else {
-        passwordInput.type = "password";
-        eyeIcon.setAttribute("fill", "#6b7280");
-    }
+    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+    eyeIcon.setAttribute("fill", passwordInput.type === "password" ? "#6b7280" : "#111");
 });
 
 
-
-/* ============================================================
-   OLHO PROFISSIONAL – LOGIN
-============================================================ */
+/* ==========================
+   EYE ICON — LOGIN
+========================== */
 const loginPasswordInput = document.getElementById("login_password");
 const togglePassLogin = document.getElementById("togglePassLogin");
 const eyeIconLogin = document.getElementById("eyeIconLogin");
 
 togglePassLogin.addEventListener("click", () => {
-    if (loginPasswordInput.type === "password") {
-        loginPasswordInput.type = "text";
-        eyeIconLogin.setAttribute("fill", "#111");
-    } else {
-        loginPasswordInput.type = "password";
-        eyeIconLogin.setAttribute("fill", "#6b7280");
-    }
+    loginPasswordInput.type =
+        loginPasswordInput.type === "password" ? "text" : "password";
+
+    eyeIconLogin.setAttribute(
+        "fill",
+        loginPasswordInput.type === "password" ? "#6b7280" : "#111"
+    );
 });
 
 
-
-/* ----------------------
-   REGISTAR UTILIZADOR
------------------------- */
-document.getElementById("registerBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
-
+/* ==========================
+   REGISTER
+========================== */
+document.getElementById("registerBtn").addEventListener("click", async () => {
     const username = reg_username.value.trim();
     const email = reg_email.value.trim();
     const password = reg_password.value.trim();
@@ -182,14 +161,15 @@ document.getElementById("registerBtn").addEventListener("click", async (e) => {
     }
 
     if (!emailRegex.test(email)) {
-        registerError.textContent = "Por favor, insira um email válido.";
+        registerError.textContent = "Email inválido.";
         registerError.style.color = "red";
         return;
     }
 
-    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    const strongPassword =
+        validLength && validUpper && validNumber && validSymbol;
 
-    if (!strongPassword.test(password)) {
+    if (!strongPassword) {
         registerError.textContent = "A palavra-passe não cumpre os requisitos.";
         registerError.style.color = "red";
         return;
@@ -198,8 +178,8 @@ document.getElementById("registerBtn").addEventListener("click", async (e) => {
     try {
         const res = await fetch(`${API_URL}/auth/register`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email, password })
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({username, email, password})
         });
 
         const data = await res.json();
@@ -211,28 +191,25 @@ document.getElementById("registerBtn").addEventListener("click", async (e) => {
         }
 
         showLogin();
-        loginError.textContent = "Conta criada com sucesso! Já pode iniciar sessão.";
+        loginError.textContent = "Conta criada com sucesso!";
         loginError.style.color = "green";
 
     } catch {
-        registerError.textContent = "Erro de conexão com o servidor.";
+        registerError.textContent = "Erro de conexão.";
         registerError.style.color = "red";
     }
 });
 
 
-
-/* ----------------------
+/* ==========================
    LOGIN
------------------------- */
-document.getElementById("loginBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
-
+========================== */
+document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = login_email.value.trim();
     const password = login_password.value.trim();
 
     if (!email || !password) {
-        loginError.textContent = "Por favor, preencha todos os campos.";
+        loginError.textContent = "Preencha todos os campos.";
         loginError.style.color = "red";
         return;
     }
@@ -240,8 +217,8 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
     try {
         const res = await fetch(`${API_URL}/auth/login`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({email, password})
         });
 
         const data = await res.json();
@@ -258,7 +235,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
         window.location.href = "index.html";
 
     } catch {
-        loginError.textContent = "Erro de conexão com o servidor.";
+        loginError.textContent = "Erro de conexão.";
         loginError.style.color = "red";
     }
 });

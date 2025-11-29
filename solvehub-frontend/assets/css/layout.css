@@ -1,0 +1,28 @@
+/* Layout principal */
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Sidebar — igual ao original + borda arredondada */
+.sidebar {
+    background: var(--bg-white);
+    border-right: 1px solid var(--border);
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    border-top-right-radius: 38px;
+}
+
+/* Content — igual ao original + borda curva */
+.content {
+    padding: 30px 40px;
+    background: #f7f9fc;
+    overflow-y: auto;
+
+    border-top-left-radius: 38px;
+}

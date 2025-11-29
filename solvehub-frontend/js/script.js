@@ -1,11 +1,26 @@
+// Dropdown do perfil
 const profile = document.querySelector(".profile");
 const menu = document.getElementById("profileMenu");
 
-profile.addEventListener("click", (e) => {
-    e.stopPropagation();
-    menu.classList.toggle("hidden");
-});
+// Proteção para páginas sem dropdown
+if (profile && menu) {
 
-document.addEventListener("click", () => {
-    menu.classList.add("hidden");
-});
+    profile.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", () => {
+        menu.classList.add("hidden");
+    });
+}
+
+// Logout handler
+const logoutBtn = document.querySelector(".logout");
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "auth.html";
+    });
+}

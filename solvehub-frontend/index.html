@@ -1,114 +1,119 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>SolveHub – Lista de Exercícios</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- CSS externo -->
-    <link rel="stylesheet" href="/assets/styles.css">
+    <!-- CSS modular -->
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/layout.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/exercises.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+    <link rel="stylesheet" href="./assets/css/index.css">
 </head>
 <body>
 
-<div class="app-shell">
+<div class="layout">
 
-    <!-- Header -->
-    <header class="app-header">
-        <div class="app-title">
-            Solve<span>Hub</span>
-        </div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-        <div class="profile">
-            <span class="profile-name">Olá, Afonso</span>
-            <div class="avatar">AA</div>
+        <div class="logo">Solve<span>Hub</span></div>
 
-            <!-- Dropdown -->
-            <div class="profile-dropdown hidden" id="profileMenu">
-                <a href="#" class="dropdown-item">⚙️ Definições</a>
-                <a href="#" class="dropdown-item logout">🚪 Log Out</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Body -->
-    <div class="app-body">
-
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="nav-section">
-                <h2>Navegação</h2>
-                <div class="nav-link active"><span>📚</span> Lista de exercícios</div>
-                <div class="nav-link"><span>⭐</span> Os meus favoritos</div>
-                <div class="nav-link"><span>📝</span> Os meus exercícios</div>
-            </div>
-
-            <div class="nav-section">
-                <h2>Disciplinas</h2>
-                <span class="tag-pill">Cálculo</span>
-                <span class="tag-pill">BD</span>
-                <span class="tag-pill">Redes</span>
-                <span class="tag-pill">Sistemas</span>
-            </div>
-        </aside>
-
-        <!-- Main -->
-        <main class="main">
-            
-            <!-- Header -->
-            <div class="main-header">
-                <div class="main-header-left">
-                    <h1>Página Inicial – Lista de Exercícios</h1>
-                    <p>Explora dúvidas de colegas e participa na resolução colaborativa.</p>
-                </div>
-
-                <div class="main-header-right">
-                    <button class="btn-ghost">Ordenar por mais recentes</button>
-                    <button class="btn-primary">＋ Novo exercício</button>
-                </div>
-            </div>
-
-            <!-- Filtros -->
-            <div class="filters-row">
-                <div class="input-search">
-                    <span>🔍</span>
-                    <input type="text" placeholder="Pesquisar exercícios..." />
-                </div>
-
-                <div class="filter-select">
-                    Filtro: Todas as disciplinas
-                </div>
-            </div>
+        <nav class="menu">
+            <p class="menu-title">Navegação</p>
 
             <!-- Lista -->
-            <section class="exercise-list">
+            <a class="menu-item active">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                Lista de exercícios
+            </a>
 
-                <article class="exercise-card">
-                    <div class="exercise-main">
-                        <h3>Calcular derivada de função racional</h3>
-                        <p class="meta">Autor: João | Cálculo</p>
-                        <p class="preview">
-                            Preciso de ajuda para derivar a função (2x³ − 5x + 1) / (x² + 1).
-                        </p>
-                    </div>
+            <!-- Favoritos -->
+            <a class="menu-item">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2"
+                        d="M11.48 3.499a.905.905 0 011.04 0l7.06 4.93c.79.55.79 1.69 0 2.24l-7.06 4.93a.905.905 0 01-1.04 0l-7.06-4.93a1.32 1.32 0 010-2.24l7.06-4.93z"/>
+                </svg>
+                Favoritos
+            </a>
 
-                    <div class="exercise-side">
-                        <span class="badge-discipline">Cálculo</span>
-                        <div class="stats-row">
-                            <span class="chip">4 respostas</span>
-                            <span class="chip">12 votos</span>
-                        </div>
-                        <span class="time-label">há 15 min</span>
-                    </div>
-                </article>
+            <!-- Meus exercícios -->
+            <a class="menu-item">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M12 6v12m6-6H6"/>
+                </svg>
+                Meus exercícios
+            </a>
+        </nav>
 
-            </section>
+        <!-- DISCIPLINAS -->
+        <nav class="menu">
+            <p class="menu-title">Disciplinas</p>
+            <div class="tag-group">
+                <span class="tag">Cálculo</span>
+                <span class="tag">BD</span>
+                <span class="tag">Redes</span>
+                <span class="tag">Sistemas</span>
+            </div>
+        </nav>
 
-        </main>
-    </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div></div>
+
+            <div class="profile">
+                <span class="profile-name">Olá, Afonso</span>
+                <div class="avatar">AA</div>
+
+                <div class="dropdown hidden" id="profileMenu">
+                    <a class="dropdown-item">Definições</a>
+                    <a class="dropdown-item logout">Terminar sessão</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- HEADER -->
+        <section class="page-header">
+            <div>
+                <h1>Lista de Exercícios</h1>
+                <p>Explora dúvidas de colegas e participa na resolução colaborativa.</p>
+            </div>
+
+            <div class="actions">
+                <button class="btn-outline">Ordenar por mais recentes</button>
+                <button class="btn-primary" onclick="window.location.href='create.html'">
+                    + Novo exercício
+                </button>
+            </div>
+        </section>
+
+        <!-- SEARCH BAR -->
+        <div class="filters">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Pesquisar exercícios, temas, autores...">
+            </div>
+        </div>
+
+        <!-- LIST -->
+        <section class="exercise-list" id="exerciseList"></section>
+
+    </main>
 </div>
 
-<!-- JS externo -->
-<script src="script.js"></script>
+<!-- JS -->
+<script src="./js/api.js"></script>
+<script src="./js/index.js"></script>
+<script src="./js/script.js"></script>
 
 </body>
 </html>

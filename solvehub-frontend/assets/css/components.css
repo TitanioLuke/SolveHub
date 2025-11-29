@@ -1,0 +1,130 @@
+/* Logo */
+.logo {
+    font-size: 22px;
+    font-weight: 700;
+}
+.logo span {
+    color: var(--primary);
+}
+
+/* Sidebar elements */
+.menu-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #475569;
+}
+
+.menu-item:hover {
+    background: #f3f6ff;
+}
+
+.menu-item.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.menu-item svg.icon {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    stroke: #475569;
+}
+
+.menu-item.active svg.icon {
+    stroke: var(--primary);
+}
+
+/* Topbar */
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.profile-name {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dropdown */
+.dropdown {
+    position: absolute;
+    right: 40px;
+    top: 65px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 150px;
+    box-shadow: var(--shadow);
+}
+
+.dropdown-item {
+    padding: 10px 14px;
+    cursor: pointer;
+}
+.dropdown-item:hover {
+    background: #f3f6ff;
+}
+
+/* Tags */
+.tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    background: #eef2ff;
+    color: #4338ca;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+/* Buttons */
+.btn-primary {
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+
+.btn-outline {
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: white;
+    color: #111;
+}

@@ -1,0 +1,94 @@
+/* BACKGROUND ONLY FOR LOGIN/REGISTER */
+body:has(.auth-container) {
+    background: #e8ecf5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* MAIN WRAPPER */
+.auth-container {
+    width: 950px;
+    height: 550px;
+    background: white;
+    border-radius: 30px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+
+/* PANELS */
+.side {
+    width: 50%;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.brand-bg {
+    background: linear-gradient(135deg, #2f54ff, #5271ff);
+    color: white;
+}
+
+.form-bg {
+    background: white;
+}
+
+/* FORM BOX */
+.form-box h2 {
+    font-size: 32px;
+    margin-bottom: 24px;
+}
+
+.form-box input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    font-size: 15px;
+}
+
+.form-box input:focus {
+    border-color: #2f54ff;
+    box-shadow: 0 0 0 1px rgba(47, 84, 255, .2);
+}
+
+/* PASSWORD */
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    cursor: pointer;
+}
+
+/* RULES */
+.password-rules {
+    margin-top: 12px;
+    padding-left: 18px;
+    font-size: 14px;
+    color: red;
+}
+
+#passwordStatus {
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* LINKS */
+.link {
+    color: #2f54ff;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}

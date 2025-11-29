@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>SolveHub</title>
-    <link rel="stylesheet" href="assets/styles.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/auth.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
 </head>
+
 <body>
 
 <div class="auth-container">
 
-    <!-- LADO ESQUERDO -->
+    <!-- LEFT SIDE -->
     <div class="side brand-bg" id="leftSide">
 
         <div class="brand-box" id="brandLeft">
@@ -21,29 +27,27 @@
         <div class="form-box hidden" id="registerForm">
             <h2>Criar Conta</h2>
 
-            <input type="text" placeholder="Nome de utilizador" id="reg_username" required>
-            <input type="email" placeholder="Email" id="reg_email" required>
+            <input type="text" id="reg_username" placeholder="Nome de utilizador">
+            <input type="email" id="reg_email" placeholder="Email">
 
-            <!-- PASSWORD + OLHO -->
+            <!-- PASSWORD -->
             <div class="password-wrapper">
-                <input type="password" placeholder="Palavra-passe" id="reg_password" required>
+                <input type="password" id="reg_password" placeholder="Palavra-passe">
+
                 <span id="togglePass" class="toggle-password">
-                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" height="22" width="22"
-                         viewBox="0 0 24 24" fill="#6b7280">
-                        <path d="M12 5c-7.633 0-10 7-10 7s2.367 7 10 7 10-7 10-7-2.367-7-10-7zm0
-                        12a5 5 0 110-10 5 5 0 010 10z"/>
+                    <svg id="eyeIcon" width="22" height="22" viewBox="0 0 24 24" fill="#6b7280">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 100-8 4 4 0 000 8z"/>
                     </svg>
                 </span>
             </div>
 
-            <!-- REGRAS DE PASSWORD -->
+            <!-- PASSWORD RULES -->
             <div id="passwordContainer" class="hidden">
-                <ul class="password-rules" id="passwordRules">
-                    <li id="rule-length">● Pelo menos 8 caracteres</li>
-                    <li id="rule-upper">● Uma letra maiúscula</li>
-                    <li id="rule-lower">● Uma letra minúscula</li>
-                    <li id="rule-number">● Um número</li>
-                    <li id="rule-symbol">● Um símbolo (!@#$%)</li>
+                <ul class="password-rules">
+                    <li id="rule-length">• Pelo menos 8 caracteres</li>
+                    <li id="rule-upper">• Uma letra maiúscula</li>
+                    <li id="rule-number">• Um número</li>
+                    <li id="rule-symbol">• Um símbolo (!@#$%)</li>
                 </ul>
                 <p id="passwordStatus"></p>
             </div>
@@ -52,29 +56,28 @@
 
             <p class="switch">
                 Já tens conta?
-                <span class="link" id="toLogin">Entrar</span>
+                <span id="toLogin" class="link">Entrar</span>
             </p>
 
             <p id="registerError" class="error-message"></p>
         </div>
+
     </div>
 
-    <!-- LADO DIREITO (LOGIN) -->
+    <!-- RIGHT SIDE -->
     <div class="side form-bg" id="rightSide">
 
         <div class="form-box" id="loginForm">
             <h2>Entrar</h2>
 
-            <input type="email" placeholder="Email" id="login_email" required>
+            <input type="email" id="login_email" placeholder="Email">
 
-            <!-- LOGIN PASSWORD + OLHO -->
             <div class="password-wrapper">
-                <input type="password" placeholder="Palavra-passe" id="login_password" required>
+                <input type="password" id="login_password" placeholder="Palavra-passe">
+
                 <span id="togglePassLogin" class="toggle-password">
-                    <svg id="eyeIconLogin" xmlns="http://www.w3.org/2000/svg" height="22" width="22"
-                         viewBox="0 0 24 24" fill="#6b7280">
-                        <path d="M12 5c-7.633 0-10 7-10 7s2.367 7 10 7 10-7 10-7-2.367-7-10-7zm0
-                        12a5 5 0 110-10 5 5 0 010 10z"/>
+                    <svg id="eyeIconLogin" width="22" height="22" viewBox="0 0 24 24" fill="#6b7280">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 100-8 4 4 0 000 8z"/>
                     </svg>
                 </span>
             </div>
@@ -83,7 +86,7 @@
 
             <p class="switch">
                 Ainda não tens conta?
-                <span class="link" id="toRegister">Registar</span>
+                <span id="toRegister" class="link">Registar</span>
             </p>
 
             <p id="loginError" class="error-message"></p>
@@ -93,11 +96,12 @@
             <h1>SolveHub</h1>
             <p>A melhor forma de aprender é colaborar.</p>
         </div>
+
     </div>
 
 </div>
 
-<script src="js/auth.js"></script>
+<script src="./js/auth.js"></script>
 
 </body>
 </html>
