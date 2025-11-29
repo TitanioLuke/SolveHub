@@ -1,4 +1,6 @@
-/* SELECTORS */
+/* ===============================
+   SELECTORS
+================================ */
 const leftSide = document.getElementById("leftSide");
 const rightSide = document.getElementById("rightSide");
 
@@ -17,10 +19,15 @@ const registerError = document.getElementById("registerError");
 const API_URL = "http://localhost:5050";
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Validation flags
+let validLength = false;
+let validUpper = false;
+let validNumber = false;
+let validSymbol = false;
 
-/* ==========================
-    VIEW SWITCHING
-========================== */
+/* ===============================
+   VIEW SWITCHING
+================================ */
 function showLogin() {
     leftSide.classList.add("brand-bg");
     leftSide.classList.remove("form-bg");
@@ -34,8 +41,7 @@ function showLogin() {
     registerForm.classList.add("hidden");
     brandRight.classList.add("hidden");
 
-    loginError.textContent = "";
-    registerError.textContent = "";
+    clearMessages();
 }
 
 function showRegister() {
@@ -51,23 +57,29 @@ function showRegister() {
     loginForm.classList.add("hidden");
     brandLeft.classList.add("hidden");
 
+    clearMessages();
+}
+
+function clearMessages() {
     loginError.textContent = "";
     registerError.textContent = "";
+    loginError.style.background = "";
+    loginError.style.color = "";
+    registerError.style.background = "";
+    registerError.style.color = "";
 }
 
 toRegister.addEventListener("click", showRegister);
 toLogin.addEventListener("click", showLogin);
 
+// Initialize
 showLogin();
 
-
-/* ==========================
+/* ===============================
    PASSWORD VALIDATION
-========================== */
-
+================================ */
 const passwordInput = document.getElementById("reg_password");
 const passwordContainer = document.getElementById("passwordContainer");
-
 const statusText = document.getElementById("passwordStatus");
 
 const ruleLength = document.getElementById("rule-length");
@@ -86,15 +98,15 @@ passwordInput.addEventListener("input", () => {
 
     passwordContainer.classList.remove("hidden");
 
-    const validLength = /.{8,}/.test(value);
-    const validUpper = /[A-Z]/.test(value);
-    const validNumber = /\d/.test(value);
-    const validSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+    validLength = /.{8,}/.test(value);
+    validUpper = /[A-Z]/.test(value);
+    validNumber = /\d/.test(value);
+    validSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(value);
 
-    ruleLength.style.display = validLength ? "none" : "list-item";
-    ruleUpper.style.display = validUpper ? "none" : "list-item";
-    ruleNumber.style.display = validNumber ? "none" : "list-item";
-    ruleSymbol.style.display = validSymbol ? "none" : "list-item";
+    ruleLength.style.display = validLength ? "none" : "flex";
+    ruleUpper.style.display = validUpper ? "none" : "flex";
+    ruleNumber.style.display = validNumber ? "none" : "flex";
+    ruleSymbol.style.display = validSymbol ? "none" : "flex";
 
     const missing = [
         !validLength,
@@ -104,76 +116,102 @@ passwordInput.addEventListener("input", () => {
     ].filter(Boolean).length;
 
     if (missing === 0) {
-        statusText.textContent = "✔ Password forte!";
-        statusText.style.color = "green";
+        statusText.textContent = "✓ Password forte!";
+        statusText.style.color = "#16a34a";
     } else if (missing === 1) {
-        statusText.textContent = "Quase lá… falta 1 requisito.";
-        statusText.style.color = "orange";
+        statusText.textContent = "⚠ Quase lá… falta 1 requisito.";
+        statusText.style.color = "#f59e0b";
     } else {
-        statusText.textContent = "Password fraca (faltam vários requisitos).";
-        statusText.style.color = "red";
+        statusText.textContent = "✗ Password fraca (faltam vários requisitos).";
+        statusText.style.color = "#dc2626";
     }
 });
 
-
-/* ==========================
-   EYE ICON — REGISTER
-========================== */
+/* ===============================
+   TOGGLE PASSWORD VISIBILITY
+================================ */
 const togglePass = document.getElementById("togglePass");
 const eyeIcon = document.getElementById("eyeIcon");
 
 togglePass.addEventListener("click", () => {
-    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-    eyeIcon.setAttribute("fill", passwordInput.type === "password" ? "#6b7280" : "#111");
+    const isPassword = passwordInput.type === "password";
+    passwordInput.type = isPassword ? "text" : "password";
+    
+    // Update icon
+    eyeIcon.innerHTML = isPassword 
+        ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
 });
 
-
-/* ==========================
-   EYE ICON — LOGIN
-========================== */
 const loginPasswordInput = document.getElementById("login_password");
 const togglePassLogin = document.getElementById("togglePassLogin");
 const eyeIconLogin = document.getElementById("eyeIconLogin");
 
 togglePassLogin.addEventListener("click", () => {
-    loginPasswordInput.type =
-        loginPasswordInput.type === "password" ? "text" : "password";
-
-    eyeIconLogin.setAttribute(
-        "fill",
-        loginPasswordInput.type === "password" ? "#6b7280" : "#111"
-    );
+    const isPassword = loginPasswordInput.type === "password";
+    loginPasswordInput.type = isPassword ? "text" : "password";
+    
+    eyeIconLogin.innerHTML = isPassword 
+        ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
 });
 
+/* ===============================
+   SHOW MESSAGE
+================================ */
+function showMessage(element, message, isError = true) {
+    element.textContent = message;
+    
+    if (isError) {
+        element.style.background = "#fef2f2";
+        element.style.color = "#dc2626";
+        element.style.border = "1px solid #fecaca";
+    } else {
+        element.style.background = "#f0fdf4";
+        element.style.color = "#16a34a";
+        element.style.border = "1px solid #bbf7d0";
+    }
+}
 
-/* ==========================
+/* ===============================
    REGISTER
-========================== */
+================================ */
 document.getElementById("registerBtn").addEventListener("click", async () => {
     const username = reg_username.value.trim();
     const email = reg_email.value.trim();
     const password = reg_password.value.trim();
 
+    // Clear previous errors
+    registerError.textContent = "";
+
+    // Validation
     if (!username || !email || !password) {
-        registerError.textContent = "Por favor, preencha todos os campos.";
-        registerError.style.color = "red";
+        showMessage(registerError, "Por favor, preenche todos os campos.");
+        return;
+    }
+
+    if (username.length < 3) {
+        showMessage(registerError, "O nome de utilizador deve ter pelo menos 3 caracteres.");
         return;
     }
 
     if (!emailRegex.test(email)) {
-        registerError.textContent = "Email inválido.";
-        registerError.style.color = "red";
+        showMessage(registerError, "Email inválido.");
         return;
     }
 
-    const strongPassword =
-        validLength && validUpper && validNumber && validSymbol;
+    const strongPassword = validLength && validUpper && validNumber && validSymbol;
 
     if (!strongPassword) {
-        registerError.textContent = "A palavra-passe não cumpre os requisitos.";
-        registerError.style.color = "red";
+        showMessage(registerError, "A palavra-passe não cumpre os requisitos de segurança.");
         return;
     }
+
+    // Show loading state
+    const btn = document.getElementById("registerBtn");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span>A criar conta...</span>';
+    btn.disabled = true;
 
     try {
         const res = await fetch(`${API_URL}/auth/register`, {
@@ -185,34 +223,57 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
         const data = await res.json();
 
         if (!res.ok) {
-            registerError.textContent = data.message || "Erro ao criar conta.";
-            registerError.style.color = "red";
+            showMessage(registerError, data.message || "Erro ao criar conta.");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
             return;
         }
 
+        // Success - switch to login
         showLogin();
-        loginError.textContent = "Conta criada com sucesso!";
-        loginError.style.color = "green";
+        showMessage(loginError, "✓ Conta criada com sucesso! Faz login para continuar.", false);
+        
+        // Clear register form
+        reg_username.value = "";
+        reg_email.value = "";
+        reg_password.value = "";
+        passwordContainer.classList.add("hidden");
 
-    } catch {
-        registerError.textContent = "Erro de conexão.";
-        registerError.style.color = "red";
+    } catch (error) {
+        showMessage(registerError, "Erro de conexão com o servidor.");
+        console.error("Register error:", error);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 });
 
-
-/* ==========================
+/* ===============================
    LOGIN
-========================== */
+================================ */
 document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = login_email.value.trim();
     const password = login_password.value.trim();
 
+    // Clear previous errors
+    loginError.textContent = "";
+
+    // Validation
     if (!email || !password) {
-        loginError.textContent = "Preencha todos os campos.";
-        loginError.style.color = "red";
+        showMessage(loginError, "Preenche todos os campos.");
         return;
     }
+
+    if (!emailRegex.test(email)) {
+        showMessage(loginError, "Email inválido.");
+        return;
+    }
+
+    // Show loading state
+    const btn = document.getElementById("loginBtn");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span>A entrar...</span>';
+    btn.disabled = true;
 
     try {
         const res = await fetch(`${API_URL}/auth/login`, {
@@ -224,18 +285,41 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
         const data = await res.json();
 
         if (!res.ok) {
-            loginError.textContent = data.message || "Credenciais inválidas.";
-            loginError.style.color = "red";
+            showMessage(loginError, data.message || "Credenciais inválidas.");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
             return;
         }
 
+        // Success - save token and redirect
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        window.location.href = "index.html";
+        showMessage(loginError, "✓ Login bem-sucedido! A redirecionar...", false);
 
-    } catch {
-        loginError.textContent = "Erro de conexão.";
-        loginError.style.color = "red";
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 1000);
+
+    } catch (error) {
+        showMessage(loginError, "Erro de conexão com o servidor.");
+        console.error("Login error:", error);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+/* ===============================
+   ENTER KEY SUPPORT
+================================ */
+login_password.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        document.getElementById("loginBtn").click();
+    }
+});
+
+reg_password.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        document.getElementById("registerBtn").click();
     }
 });
