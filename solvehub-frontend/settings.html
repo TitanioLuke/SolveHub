@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Definições</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS modular -->
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/layout.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+    <link rel="stylesheet" href="./assets/css/settings.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            Solve<span>Hub</span>
+        </div>
+
+        <nav class="menu">
+            <p class="menu-title">Menu Principal</p>
+
+            <a class="menu-item" href="index.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Início
+            </a>
+
+            <a class="menu-item" href="#">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Explorar
+            </a>
+
+            <a class="menu-item" href="#">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Meus exercícios
+            </a>
+
+            <a class="menu-item" href="#">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                </svg>
+                Guardados
+            </a>
+        </nav>
+
+        <nav class="menu">
+            <a class="menu-item active" href="settings.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Definições
+            </a>
+        </nav>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div></div>
+
+            <div class="topbar-actions">
+                <button class="icon-btn" title="Notificações">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+                    </svg>
+                </button>
+
+                <div class="profile">
+                    <span class="profile-name">Afonso Araújo</span>
+                    <div class="avatar">AA</div>
+
+                    <div class="dropdown hidden" id="profileMenu">
+                        <a class="dropdown-item" href="#">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Perfil
+                        </a>
+                        <a class="dropdown-item" href="settings.html">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/>
+                            </svg>
+                            Definições
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item logout">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9"/>
+                            </svg>
+                            Terminar sessão
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- SETTINGS CONTAINER -->
+        <div class="settings-container">
+
+            <!-- SETTINGS SIDEBAR -->
+            <aside class="settings-sidebar">
+                <nav class="settings-nav">
+                    <a class="settings-nav-item active" data-section="profile">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>Perfil</span>
+                    </a>
+
+                    <a class="settings-nav-item" data-section="account">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                            <path d="M20 8v6M23 11h-6"/>
+                        </svg>
+                        <span>Conta</span>
+                    </a>
+
+                    <a class="settings-nav-item" data-section="notifications">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+                        </svg>
+                        <span>Notificações</span>
+                    </a>
+
+                    <a class="settings-nav-item" data-section="appearance">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <span>Aparência</span>
+                    </a>
+
+                    <a class="settings-nav-item" data-section="privacy">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>Privacidade</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- SETTINGS CONTENT -->
+            <div class="settings-content">
+
+                <!-- PROFILE SECTION -->
+                <section class="settings-section active" id="profile">
+                    <div class="section-header">
+                        <h2>Perfil</h2>
+                        <p>Gere as informações do teu perfil público</p>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="avatar-upload">
+                            <div class="avatar-large">AA</div>
+                            <div>
+                                <button class="btn-outline">Alterar foto</button>
+                                <p class="help-text">JPG, PNG ou GIF. Máximo 2MB.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="form-group">
+                            <label>Nome de utilizador</label>
+                            <input type="text" id="username" value="Afonso Araújo" placeholder="O teu nome">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" value="afonso.araujo@example.com" placeholder="email@exemplo.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Bio</label>
+                            <textarea id="bio" rows="4" placeholder="Conta-nos um pouco sobre ti..."></textarea>
+                            <span class="char-count">0 / 500</span>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn-outline">Cancelar</button>
+                            <button class="btn-primary">
+                                <span>Guardar alterações</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ACCOUNT SECTION -->
+                <section class="settings-section" id="account">
+                    <div class="section-header">
+                        <h2>Conta</h2>
+                        <p>Gere as definições da tua conta</p>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Alterar palavra-passe</h3>
+                        <div class="form-group">
+                            <label>Palavra-passe atual</label>
+                            <input type="password" placeholder="Introduz a palavra-passe atual">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nova palavra-passe</label>
+                            <input type="password" placeholder="Mínimo 8 caracteres">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirmar palavra-passe</label>
+                            <input type="password" placeholder="Repete a nova palavra-passe">
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn-primary">
+                                <span>Atualizar palavra-passe</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card danger-zone">
+                        <h3>Zona de perigo</h3>
+                        <p>Ações irreversíveis relacionadas com a tua conta</p>
+                        <div class="form-actions">
+                            <button class="btn-danger">Eliminar conta</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- NOTIFICATIONS SECTION -->
+                <section class="settings-section" id="notifications">
+                    <div class="section-header">
+                        <h2>Notificações</h2>
+                        <p>Configura como queres ser notificado</p>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Novas respostas</h4>
+                                <p>Recebe notificações quando alguém responde aos teus exercícios</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Comentários</h4>
+                                <p>Recebe notificações de novos comentários</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Votos</h4>
+                                <p>Recebe notificações quando alguém vota nas tuas respostas</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Email diário</h4>
+                                <p>Recebe um resumo diário por email</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- APPEARANCE SECTION -->
+                <section class="settings-section" id="appearance">
+                    <div class="section-header">
+                        <h2>Aparência</h2>
+                        <p>Personaliza a aparência da plataforma</p>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Tema</h3>
+                        <div class="theme-options">
+                            <label class="theme-option active">
+                                <input type="radio" name="theme" value="light" checked>
+                                <div class="theme-preview light">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="5"/>
+                                        <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                                    </svg>
+                                </div>
+                                <span>Claro</span>
+                            </label>
+
+                            <label class="theme-option">
+                                <input type="radio" name="theme" value="dark">
+                                <div class="theme-preview dark">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                                    </svg>
+                                </div>
+                                <span>Escuro</span>
+                            </label>
+
+                            <label class="theme-option">
+                                <input type="radio" name="theme" value="auto">
+                                <div class="theme-preview auto">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                        <path d="M8 21h8M12 17v4"/>
+                                    </svg>
+                                </div>
+                                <span>Automático</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PRIVACY SECTION -->
+                <section class="settings-section" id="privacy">
+                    <div class="section-header">
+                        <h2>Privacidade e Segurança</h2>
+                        <p>Gere as tuas preferências de privacidade</p>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Perfil público</h4>
+                                <p>O teu perfil pode ser visto por outros utilizadores</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Mostrar email</h4>
+                                <p>O teu email fica visível no perfil público</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Atividade</h4>
+                                <p>Outros utilizadores podem ver a tua atividade recente</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- JS -->
+<script src="./js/settings.js"></script>
+<script src="./js/script.js"></script>
+
+</body>
+</html>
