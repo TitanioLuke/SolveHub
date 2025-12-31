@@ -1,4 +1,66 @@
 // ===============================
+//   AUTH / USER CONFIG
+// ===============================
+const API_URL = "http://localhost:5050";
+const token = localStorage.getItem("token");
+
+async function authFetch(url, options = {}) {
+    return fetch(`${API_URL}${url}`, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            ...(options.headers || {})
+        }
+    });
+}
+
+// ===============================
+//   LOAD LOGGED USER (TOPBAR)
+// ===============================
+async function loadLoggedUser() {
+    if (!token) {
+        window.location.href = "auth.html";
+        return;
+    }
+
+    try {
+        const res = await authFetch("/auth/me");
+        if (!res.ok) throw new Error("Não autenticado");
+
+        const user = await res.json();
+
+        // Cache local (opcional)
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // Nome do utilizador
+        const profileName = document.querySelector(".profile-name");
+        if (profileName) {
+            profileName.textContent = user.username;
+        }
+
+        // Avatar com iniciais automáticas
+        const avatar = document.querySelector(".avatar");
+        if (avatar && user.username) {
+            const initials = user.username
+                .trim()
+                .split(" ")
+                .map(word => word[0])
+                .join("")
+                .substring(0, 2)
+                .toUpperCase();
+
+            avatar.textContent = initials;
+        }
+
+    } catch (err) {
+        console.error("Erro ao carregar utilizador:", err);
+        localStorage.clear();
+        window.location.href = "auth.html";
+    }
+}
+
+// ===============================
 //   GLOBAL STATE
 // ===============================
 let allExercises = [];
@@ -10,8 +72,7 @@ let currentFilter = null;
 // ===============================
 async function loadExercises() {
     const container = document.getElementById("exerciseList");
-    
-    // LOADING STATE
+
     container.innerHTML = `
         <div class="loading-state">
             <div class="loading-spinner"></div>
@@ -23,13 +84,9 @@ async function loadExercises() {
         const exercises = await apiGet("/exercises");
         allExercises = exercises || [];
 
-        // Update stats
         updateStats(allExercises);
-
-        // LIMPAR CONTAINER
         container.innerHTML = "";
 
-        // EMPTY STATE
         if (!allExercises || allExercises.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -40,24 +97,16 @@ async function loadExercises() {
                         </svg>
                     </div>
                     <h3>Nenhum exercício encontrado</h3>
-                    <p>Ainda não existem exercícios disponíveis. Sê o primeiro a criar um!</p>
-                    <button class="btn-primary" onclick="window.location.href='create.html'">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14M5 12h14"/>
-                        </svg>
-                        Criar primeiro exercício
-                    </button>
+                    <p>Ainda não existem exercícios disponíveis.</p>
                 </div>
             `;
             return;
         }
 
-        // RENDER EXERCISES
         renderExercises(allExercises);
 
     } catch (error) {
         console.error("Erro ao carregar exercícios:", error);
-        // Remove error message display - stats will show 0 exercises
         container.innerHTML = "";
     }
 }
@@ -86,13 +135,7 @@ function renderExercises(exercises) {
                         ${answersCount === 0 ? '<span class="badge-new">Novo</span>' : ''}
                     </div>
                     <p class="subtitle">
-                        <span class="author">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                                <circle cx="12" cy="7" r="4"/>
-                            </svg>
-                            ${ex.author?.username || 'Anónimo'}
-                        </span>
+                        <span class="author">${ex.author?.username || 'Anónimo'}</span>
                         <span class="separator">•</span>
                         <span class="subject">${ex.subject || 'Geral'}</span>
                         <span class="separator">•</span>
@@ -105,17 +148,9 @@ function renderExercises(exercises) {
                     <span class="badge">${ex.subject || 'Geral'}</span>
                     <div class="meta-stats">
                         <span class="meta-stat ${answersCount > 0 ? 'has-answers' : ''}">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                            </svg>
                             ${answersCount}
                         </span>
-                        <span class="meta-stat">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            ${votes}
-                        </span>
+                        <span class="meta-stat">${votes}</span>
                     </div>
                 </div>
             </article>
@@ -139,46 +174,6 @@ function updateStats(exercises) {
 // ===============================
 //   SORT FUNCTIONALITY
 // ===============================
-const sortBtn = document.getElementById('sortBtn');
-const sortMenu = document.getElementById('sortMenu');
-
-if (sortBtn && sortMenu) {
-    sortBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        sortMenu.classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', () => {
-        if (!sortMenu.classList.contains('hidden')) {
-            sortMenu.classList.add('hidden');
-        }
-    });
-
-    sortMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-
-    // Sort items
-    document.querySelectorAll('.dropdown-menu-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const sortType = item.dataset.sort;
-            currentSort = sortType;
-
-            // Update active state
-            document.querySelectorAll('.dropdown-menu-item').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-
-            // Update button text
-            const btnText = item.textContent;
-            sortBtn.querySelector('span').textContent = btnText;
-
-            // Sort exercises
-            sortExercises(sortType);
-            sortMenu.classList.add('hidden');
-        });
-    });
-}
-
 function sortExercises(type) {
     let sorted = [...allExercises];
 
@@ -210,7 +205,6 @@ if (searchInput) {
     searchInput.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase();
 
-        // Show/hide clear button
         if (clearSearch) {
             clearSearch.classList.toggle('hidden', !query);
         }
@@ -226,8 +220,8 @@ if (searchInput) {
             const author = (ex.author?.username || '').toLowerCase();
             const subject = (ex.subject || '').toLowerCase();
 
-            return title.includes(query) || 
-                   description.includes(query) || 
+            return title.includes(query) ||
+                   description.includes(query) ||
                    author.includes(query) ||
                    subject.includes(query);
         });
@@ -236,12 +230,6 @@ if (searchInput) {
             const container = document.getElementById("exerciseList");
             container.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">
-                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <circle cx="24" cy="24" r="18"/>
-                            <path d="M21 21l6 6M27 21l-6 6"/>
-                        </svg>
-                    </div>
                     <h3>Nenhum resultado encontrado</h3>
                     <p>Não encontrámos exercícios com "${e.target.value}".</p>
                 </div>
@@ -267,14 +255,13 @@ if (searchInput) {
 document.querySelectorAll('.tag[data-subject]').forEach(tag => {
     tag.addEventListener('click', () => {
         const subject = tag.dataset.subject;
-        
-        const filtered = allExercises.filter(ex => 
+
+        const filtered = allExercises.filter(ex =>
             (ex.subject || '').toLowerCase().includes(subject.toLowerCase())
         );
 
         renderExercises(filtered);
 
-        // Show active filter chip
         const filterChips = document.getElementById('activeFilters');
         filterChips.innerHTML = `
             <div class="filter-chip">
@@ -352,4 +339,5 @@ if (logoutBtn) {
 // ===============================
 //   INITIALIZE
 // ===============================
+loadLoggedUser();
 loadExercises();
