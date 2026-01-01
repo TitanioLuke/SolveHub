@@ -13,7 +13,8 @@
     border-radius: 15px;
     border: 1px solid var(--border);
     display: flex;
-    justify-content: space-between;
+    gap: 16px;             
+    align-items: flex-start; 
     transition: 0.15s ease;
     cursor: pointer;
 }
@@ -47,6 +48,8 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 6px;
+    margin-left: auto;      
+    flex-shrink: 0;         
 }
 
 .badge {
@@ -69,4 +72,68 @@
 .meta-time {
     color: #6b7280;
     font-size: 12px;
+}
+
+.exercise-attachments {
+  position: relative;
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+
+.attachment-thumb {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 12px !important;
+  object-fit: cover !important;
+  border: 3px solid #f0f9ff !important;
+  display: block !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.attachments-count {
+  position: absolute !important;
+  bottom: -2px !important;
+  right: -2px !important;
+  background: #2563eb !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border: 3px solid white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
+/* Miniaturas dos exercícios */
+.exercise-photos {
+  position: relative;
+  display: inline-block;
+  margin: 0.5rem 0 0.25rem 0;
+}
+
+.photo-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.photo-count {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: #2563eb;
+  color: white;
+  border-radius: 12px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid white;
 }

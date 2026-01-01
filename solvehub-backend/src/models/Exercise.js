@@ -25,7 +25,13 @@ const ExerciseSchema = new mongoose.Schema(
         trim: true,
       }
     ],
-
+    attachments: [
+      {
+        url: { type: String, required: true },
+        type: { type: String, enum: ['image', 'pdf'], required: true },
+        filename: { type: String, required: true }
+      }
+    ],
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

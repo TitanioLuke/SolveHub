@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="./assets/css/exercises.css">
     <link rel="stylesheet" href="./assets/css/utilities.css">
     <link rel="stylesheet" href="./assets/css/index.css">
+    <link rel="stylesheet" href="./assets/css/modal.css">
+
 </head>
 <body>
 
@@ -249,29 +251,93 @@
     </div>
 
     <form id="create-exercise-form" class="sh-modal-body">
-     <div class="form-group">
-         <label for="title">Título</label>
-         <input type="text" id="title" name="title" required />
-     </div>
+        <div class="form-grid">
+            <!-- COLUNA ESQUERDA: título + disciplina + tags -->
+            <div class="form-main">
+            <div class="form-group">
+                <label for="title">Título</label>
+                <input type="text" id="title" name="title" required />
+            </div>
 
-     <div class="form-group">
-         <label for="subject">Disciplina / Assunto</label>
-         <input type="text" id="subject" name="subject" required />
-    </div>
+            <!-- DISCIPLINAS EM PILLS -->
+            <div class="form-group">
+                <label>Disciplina</label>
+                <div class="subject-pills" id="subjectPills">
+                <button type="button" class="subject-pill active" data-subject="Cálculo">Cálculo</button>
+                <button type="button" class="subject-pill" data-subject="Base de Dados">Base de Dados</button>
+                <button type="button" class="subject-pill" data-subject="Redes">Redes</button>
+                <button type="button" class="subject-pill" data-subject="Sistemas">Sistemas</button>
+                <button type="button" class="subject-pill" data-subject="Programação">Programação</button>
+                </div>
+                <input type="hidden" id="subject" name="subject" value="Cálculo" />
+            </div>
 
-     <div class="form-group">
-         <label for="description">Descrição</label>
-         <textarea id="description" name="description" rows="5" required></textarea>
- </div>
+            <!-- TAGS -->
+            <div class="form-group">
+                <label for="tagInput">Tags</label>
+                <div class="tags-input-wrapper">
+                <div class="tags-list" id="tagsList"></div>
+                <input
+                    type="text"
+                    id="tagInput"
+                    placeholder="Escreve uma tag e carrega em Enter"
+                />
+                </div>
+                <small class="tags-hint">Ex.: álgebra, exame, 1º ano</small>
+            </div>
+            </div>
 
-     <div class="sh-modal-footer">
-       <p id="form-message" class="form-message"></p>
-         <div class="actions">
+            <!-- COLUNA DIREITA: upload de ficheiros -->
+            <div class="form-side">
+            <label>Imagens / PDFs</label>
+            <div class="upload-card">
+                <div class="upload-icon">
+                <!-- ícone simples de upload -->
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                    <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                    <path d="M12 3v12m0 0l-4-4m4 4l4-4"/>
+                </svg>
+                </div>
+                <p class="upload-title">Arrasta ficheiros aqui</p>
+                <p class="upload-subtitle">ou <span>procura no teu dispositivo</span></p>
+
+                <input
+                type="file"
+                id="attachments"
+                name="attachments"
+                accept="image/*,application/pdf"
+                multiple
+                class="upload-input"
+                />
+
+                <button type="button" class="upload-btn" id="uploadTrigger">
+                Escolher ficheiros
+                </button>
+
+                <p class="upload-hint">Imagens ou PDF, até 20 MB cada.</p>
+
+                <div class="upload-previews" id="uploadPreviews"></div>
+                <ul class="upload-list" id="uploadList"></ul>
+
+            </div>
+            </div>
+        </div>
+
+        <!-- DESCRIÇÃO -->
+        <div class="form-group">
+            <label for="description">Descrição</label>
+            <textarea id="description" name="description" rows="5" required></textarea>
+        </div>
+
+        <div class="sh-modal-footer">
+            <p id="form-message" class="form-message"></p>
+            <div class="actions">
             <button type="button" class="btn-secondary" id="cancel-create">Cancelar</button>
             <button type="submit" class="btn-primary">Criar exercício</button>
-         </div>
-     </div>
-     </form>
+            </div>
+        </div>
+    </form>
+
   </div>
 </div>
 
