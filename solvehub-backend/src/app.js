@@ -1,17 +1,29 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const connectDB = require("./config/db");
 
 const app = express();
 
-// Conectar BD
+// ===============================
+// CONECTAR À BASE DE DADOS
+// ===============================
 connectDB();
 
-// Middlewares globais
+// ===============================
+// MIDDLEWARES GLOBAIS
+// ===============================
 app.use(cors());
 app.use(express.json());
 
-// Rotas
+// ===============================
+// SERVIR FICHEIROS ESTÁTICOS (AVATARES)
+// ===============================
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ===============================
+// ROTAS
+// ===============================
 const authRoutes = require("./routes/authRoutes");
 const exerciseRoutes = require("./routes/exerciseRoutes");
 
@@ -21,7 +33,9 @@ app.use("/auth", authRoutes);
 // Depois exercícios
 app.use("/exercises", exerciseRoutes);
 
-// Fallback (opcional)
+// ===============================
+// FALLBACK
+// ===============================
 app.get("/", (req, res) => {
     res.send("SolveHub API ativa!");
 });
