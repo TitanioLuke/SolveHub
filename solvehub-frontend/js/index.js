@@ -112,6 +112,18 @@ async function loadExercises() {
 }
 
 // ===============================
+//   CHECK IF EXERCISE IS NEW (3 days)
+// ===============================
+function isNewExercise(createdAt) {
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000; // 3 dias em milissegundos
+  const exerciseDate = new Date(createdAt).getTime();
+  const now = Date.now();
+  
+  return (now - exerciseDate) < THREE_DAYS_MS;
+}
+
+
+// ===============================
 //   RENDER EXERCISES
 // ===============================
 function renderExercises(exercises) {
@@ -121,8 +133,8 @@ function renderExercises(exercises) {
     exercises.forEach(ex => {
         const preview =
             ex.description && ex.description.length > 150
-                ? ex.description.substring(0, 150) + "..."
-                : ex.description || "Sem descrição disponível.";
+            ? ex.description.substring(0, 150) + "..."
+            : ex.description || "Sem descrição disponível.";
 
         const answersCount = ex.answersCount || 0;
         const votes = ex.votes || 0;
@@ -132,7 +144,7 @@ function renderExercises(exercises) {
                 <div class="exercise-info">
                     <div class="exercise-header">
                         <h3>${ex.title}</h3>
-                        ${answersCount === 0 ? '<span class="badge-new">Novo</span>' : ''}
+                        ${isNewExercise(ex.createdAt) ? '<span class="badge-new">Novo</span>' : ''}
                     </div>
                     <p class="subtitle">
                         <span class="author">${ex.author?.username || 'Anónimo'}</span>
@@ -141,6 +153,21 @@ function renderExercises(exercises) {
                         <span class="separator">•</span>
                         <span class="time">${timeAgo(ex.updatedAt || ex.createdAt)}</span>
                     </p>
+                    
+                    <!-- MINIATURAS DAS FOTOS -->
+                        ${ex.attachments && ex.attachments.length > 0 ? `
+                            <div class="exercise-attachments">
+                                ${ex.attachments.slice(0, 1).map(att => `
+                                    <img src="http://localhost:5050${att.url}" 
+                                        alt="${att.filename}" 
+                                        class="attachment-thumb"
+                                        loading="lazy">
+                                `).join('')}
+                                ${ex.attachments.length > 1 ? 
+                                    `<span class="attachments-count">+${ex.attachments.length - 1}</span>` : ''
+                                }
+                            </div>
+                        ` : ''}
                     <p class="preview">${preview}</p>
                 </div>
 
@@ -219,11 +246,13 @@ if (searchInput) {
             const description = (ex.description || '').toLowerCase();
             const author = (ex.author?.username || '').toLowerCase();
             const subject = (ex.subject || '').toLowerCase();
+            const tags = (ex.tags || []).map(tag => tag.toLowerCase()).join(' ');
 
             return title.includes(query) ||
                    description.includes(query) ||
                    author.includes(query) ||
-                   subject.includes(query);
+                   subject.includes(query) ||
+                   tags.includes(query);
         });
 
         if (filtered.length === 0) {

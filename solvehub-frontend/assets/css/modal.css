@@ -1,0 +1,375 @@
+.sh-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.sh-modal-overlay.hidden {
+  display: none;
+}
+
+.sh-modal {
+  width: 100%;
+  max-width: 720px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  overflow: hidden;
+}
+
+.sh-modal-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sh-modal-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.sh-modal-close {
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.sh-modal-body {
+  padding: 1.5rem 1.75rem 1.25rem;
+}
+
+.sh-modal .form-group {
+  margin-bottom: 1rem;
+}
+
+.sh-modal label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.sh-modal input,
+.sh-modal textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+}
+
+.sh-modal input:focus,
+.sh-modal textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px #2563eb33;
+}
+
+.sh-modal-footer {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sh-modal-footer .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-secondary {
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #4b5563;
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn-primary {
+  padding: 0.55rem 1.3rem;
+  border-radius: 999px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.form-message {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.form-message.error {
+  color: #dc2626;
+}
+
+.form-message.success {
+  color: #16a34a;
+}
+
+
+.subject-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.subject-pill {
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;        
+  background: #ffffff;              
+  color: #1d4ed8;                    
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.subject-pill:hover {
+  transform: translateY(-1px);
+  border-color: #60a5fa;
+}
+
+.subject-pill.active {
+  background: #2563eb;                
+  border-color: #2563eb;
+  color: #ffffff;                    
+}
+
+
+.tags-input-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+}
+
+.tag-chip button {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+#tagInput {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  outline: none;
+  font: inherit;
+  padding: 0.25rem 0.35rem;
+}
+
+.tags-hint {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1.2fr);
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.form-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.upload-card {
+  border-radius: 14px;
+  border: 1px dashed #cbd5f5;
+  background: #f9fafb;
+  padding: 1rem 1.1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.1rem;
+}
+
+.upload-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.upload-subtitle {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.upload-subtitle span {
+  color: #2563eb;
+  cursor: pointer;
+}
+
+#attachments {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.upload-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.upload-list {
+  margin-top: 0.4rem;
+  width: 100%;
+  text-align: left;
+  list-style: none;
+  padding: 0;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.upload-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.upload-input {
+  display: none;
+}
+
+.upload-btn {
+  margin-top: 0.3rem;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.upload-btn:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+/* Previews */
+.upload-previews {
+  margin-top: 0.6rem;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+.preview-item {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  background: #e5e7eb;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #4b5563;
+}
+
+.preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #f9fafb;
+  font-size: 0.65rem;
+}
+
+.preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f9fafb;
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
