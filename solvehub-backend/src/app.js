@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const fs = require("fs");
 const connectDB = require("./config/db");
 
 const app = express();
@@ -16,32 +15,32 @@ connectDB();
 // ===============================
 app.use(cors({
   origin: [
-    "http://localhost:5500/",
-    "http://127.0.0.1:5500/",
-    "http://localhost:3000/"
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "http://localhost:3000"
   ],
   credentials: true
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ===============================
-// SERVIR FICHEIROS ESTÁTICOS (UPLOADS / AVATARES)
+// SERVIR FICHEIROS ESTÁTICOS
 // ===============================
-// Usa static por defeito (mais simples e eficiente)
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "..", "uploads"))
+);
 
 // ===============================
 // ROTAS
 // ===============================
-const authRoutes = require("./routes/authRoutes");
-const exerciseRoutes = require("./routes/exerciseRoutes");
-
-app.use("/auth", authRoutes);
-app.use("/exercises", exerciseRoutes);
+app.use("/auth", require("./routes/authRoutes"));
+app.use("/exercises", require("./routes/exerciseRoutes"));
 
 // ===============================
-// FALLBACK
+// TESTE
 // ===============================
 app.get("/", (req, res) => {
   res.send("SolveHub API ativa!");

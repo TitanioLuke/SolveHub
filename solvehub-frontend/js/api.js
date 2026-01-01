@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:5050";
+const API_URL = "http://localhost:5050";
 
 // Token guardado no localStorage
 function getToken() {
@@ -7,27 +7,43 @@ function getToken() {
 
 // Headers com autorização
 function authHeaders() {
-    return {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + getToken()
+    const headers = {
+        "Content-Type": "application/json"
     };
+
+    const token = getToken();
+    if (token) {
+        headers.Authorization = "Bearer " + token;
+    }
+
+    return headers;
 }
 
 // GET
 async function apiGet(path) {
-    const res = await fetch(API_BASE + path, {
+    const res = await fetch(API_URL + path, {
         method: "GET",
         headers: authHeaders()
     });
+
+    if (!res.ok) {
+        throw new Error("Erro na API");
+    }
+
     return res.json();
 }
 
 // POST
 async function apiPost(path, body) {
-    const res = await fetch(API_BASE + path, {
+    const res = await fetch(API_URL + path, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify(body)
     });
+
+    if (!res.ok) {
+        throw new Error("Erro na API");
+    }
+
     return res.json();
 }
