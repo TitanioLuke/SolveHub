@@ -267,10 +267,53 @@ function loadUserData() {
         charCount.textContent = `${user.bio.length} / 500`;
     }
 
+    // Atualizar nome no topbar
+    const profileName = document.querySelector('.profile-name');
+    if (profileName && user.username) {
+        profileName.textContent = user.username;
+    }
+
     updateAvatar(user);
+}
+
+// ===============================
+//   LOAD USER FROM API
+// ===============================
+async function loadUserFromAPI() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'auth.html';
+        return;
+    }
+
+    try {
+        const res = await fetch('http://localhost:5050/auth/me', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'auth.html';
+                return;
+            }
+            throw new Error('Erro ao carregar utilizador');
+        }
+
+        const user = await res.json();
+        localStorage.setItem('user', JSON.stringify(user));
+        loadUserData();
+    } catch (error) {
+        console.error('Erro ao carregar utilizador:', error);
+        // Tentar usar dados do localStorage se houver
+        loadUserData();
+    }
 }
 
 // ===============================
 //   INITIALIZE
 // ===============================
-loadUserData();
+loadUserFromAPI();
