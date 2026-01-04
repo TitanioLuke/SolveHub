@@ -1,8 +1,67 @@
 require("dotenv").config();
+const http = require("http");
+const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
+const User = require("./models/User");
+
 const app = require("./app");
 
 const PORT = process.env.PORT || 5050;
 
-app.listen(PORT, () => {
+// Criar servidor HTTP
+const server = http.createServer(app);
+
+// Configurar Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "http://localhost:5500",
+      "http://127.0.0.1:5500",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+  },
+});
+
+// Middleware de autenticação para Socket.IO
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(" ")[1];
+    
+    if (!token) {
+      return next(new Error("Token não fornecido"));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
+    
+    if (!user) {
+      return next(new Error("Utilizador não encontrado"));
+    }
+
+    socket.userId = user._id.toString();
+    next();
+  } catch (error) {
+    next(new Error("Token inválido"));
+  }
+});
+
+// Conexão Socket.IO
+io.on("connection", (socket) => {
+  console.log(`Utilizador conectado: ${socket.userId}`);
+
+  // Associar utilizador a uma room
+  socket.join(`user:${socket.userId}`);
+
+  socket.on("disconnect", () => {
+    console.log(`Utilizador desconectado: ${socket.userId}`);
+  });
+});
+
+// Tornar io disponível globalmente
+app.set("io", io);
+
+server.listen(PORT, () => {
   console.log("🚀 Servidor a correr na porta", PORT);
+  console.log("📡 WebSocket ativo");
 });

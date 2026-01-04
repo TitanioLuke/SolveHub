@@ -19,6 +19,8 @@
     position: relative;
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     border-radius: 10px;
     border: 1px solid var(--border);
     background: white;
@@ -27,6 +29,16 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+}
+
+.icon-btn svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: block;
 }
 
 .icon-btn:hover {
@@ -99,16 +111,14 @@
     min-width: 200px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    z-index: 100;
+    z-index: 1000;
     opacity: 1;
     transform: translateY(0);
     transition: all 0.2s ease;
 }
 
 .dropdown-menu.hidden {
-    opacity: 0;
-    transform: translateY(-8px);
-    pointer-events: none;
+    display: none;
 }
 
 .dropdown-menu-item {

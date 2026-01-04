@@ -113,11 +113,14 @@
             <div></div>
 
             <div class="topbar-actions">
-                <button class="icon-btn" title="Notificações">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-                    </svg>
-                </button>
+                <div class="notifications-wrapper">
+                    <button class="icon-btn" title="Notificações">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown hidden" id="notificationsDropdown"></div>
+                </div>
 
                 <div class="profile">
                     <span class="profile-name"></span>
@@ -345,9 +348,51 @@
 
 
 <!-- JS -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script src="./js/api.js"></script>
 <script src="./js/index.js"></script>
+<script src="./js/notifications.js"></script>
 <script src="./js/script.js"></script>
+<script>
+    // Inicializar notificações após carregar utilizador
+    // Usar window.onload para garantir que todos os scripts foram carregados
+    window.addEventListener("load", async () => {
+        console.log("🚀 Página carregada, iniciando notificações...");
+        
+        // Verificar se já há token
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.log("⚠️ Sem token, notificações não serão inicializadas");
+            return;
+        }
+
+        // Verificar se initNotifications está disponível
+        if (typeof initNotifications !== 'function') {
+            console.error("❌ initNotifications não está definido. Verificar se notifications.js foi carregado.");
+            return;
+        }
+
+        try {
+            await loadLoggedUser();
+            console.log("✅ Utilizador carregado");
+            
+            // Aguardar um pouco para garantir que o DOM está pronto
+            setTimeout(() => {
+                console.log("🔔 Chamando initNotifications...");
+                initNotifications();
+            }, 200);
+        } catch (err) {
+            console.error("❌ Erro ao carregar utilizador:", err);
+            // Mesmo com erro, tentar inicializar se houver token
+            if (token && typeof initNotifications === 'function') {
+                setTimeout(() => {
+                    console.log("🔔 Tentando inicializar notificações mesmo com erro...");
+                    initNotifications();
+                }, 200);
+            }
+        }
+    });
+</script>
 
 </body>
 </html>

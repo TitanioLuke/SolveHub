@@ -143,6 +143,16 @@
     justify-content: center;
     font-size: 28px;
     font-weight: 600;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
     flex-shrink: 0;
 }
 

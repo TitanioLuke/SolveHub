@@ -162,6 +162,11 @@ if (avatarBtn) {
             const user = await res.json();
             localStorage.setItem('user', JSON.stringify(user));
             updateAvatar(user);
+            
+            // Atualizar avatar em todas as páginas se a função existir
+            if (typeof updateAvatarDisplay === 'function') {
+                updateAvatarDisplay(user);
+            }
 
         } catch {
             alert('Erro ao atualizar foto de perfil');

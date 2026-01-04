@@ -38,6 +38,8 @@ app.use(
 // ===============================
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/exercises", require("./routes/exerciseRoutes"));
+app.use("/answers", require("./routes/answerRoutes"));
+app.use("/notifications", require("./routes/notificationRoutes"));
 
 // ===============================
 // TESTE

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Exercício - SolveHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS modular -->
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/layout.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/exercises.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+    <link rel="stylesheet" href="./assets/css/exercise-detail.css">
+    <link rel="stylesheet" href="./assets/css/modal.css">
+
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            Solve<span>Hub</span>
+        </div>
+
+        <nav class="menu">
+            <p class="menu-title">Menu Principal</p>
+
+            <!-- Lista -->
+            <a class="menu-item" href="index.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Início
+            </a>
+
+            <!-- Explorar -->
+            <a class="menu-item" href="#">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Explorar
+            </a>
+
+            <!-- Meus exercícios -->
+            <a class="menu-item" href="#">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Meus exercícios
+            </a>
+
+            <!-- Guardados -->
+            <a class="menu-item" href="#">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                </svg>
+                Guardados
+            </a>
+        </nav>
+
+        <!-- DISCIPLINAS -->
+        <nav class="menu">
+            <p class="menu-title">Disciplinas Populares</p>
+            <div class="tag-group">
+                <span class="tag" data-subject="Cálculo">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Cálculo
+                </span>
+                <span class="tag" data-subject="BD">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Base de Dados
+                </span>
+                <span class="tag" data-subject="Redes">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Redes
+                </span>
+                <span class="tag" data-subject="SIR">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Sistemas
+                </span>
+                <span class="tag" data-subject="POO">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Programação
+                </span>
+            </div>
+        </nav>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div></div>
+
+            <div class="topbar-actions">
+                <div class="notifications-wrapper">
+                    <button class="icon-btn" title="Notificações">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown hidden" id="notificationsDropdown"></div>
+                </div>
+
+                <div class="profile">
+                    <span class="profile-name"></span>
+                    <div class="avatar"></div>      
+
+                    <div class="dropdown hidden" id="profileMenu">
+                        <a class="dropdown-item" href="settings.html">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Perfil
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item logout">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9"/>
+                            </svg>
+                            Terminar sessão
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- EXERCISE DETAIL -->
+        <section class="exercise-detail-container">
+            <div class="exercise-content-wrapper">
+                <div class="exercise-detail-card" id="exerciseDetail">
+                    <!-- Conteúdo será carregado via JS -->
+                </div>
+
+                <!-- SIDEBAR -->
+                <aside class="exercise-sidebar">
+                    <div class="sidebar-card" id="exerciseSidebar">
+                        <!-- Conteúdo será carregado via JS -->
+                    </div>
+                </aside>
+            </div>
+
+            <!-- COMMENTS SECTION -->
+            <div class="exercise-main-content">
+            <div class="comments-section">
+                <div class="comments-header">
+                    <h2>Respostas</h2>
+                    <span class="comments-count" id="commentsCount">0 respostas</span>
+                </div>
+
+                <!-- COMMENT FORM -->
+                <div class="comment-form-card">
+                    <form id="commentForm" class="comment-form">
+                        <div class="comment-form-header">
+                            <div class="comment-author-avatar" id="commentAuthorAvatar"></div>
+                            <div class="comment-form-info">
+                                <span class="comment-author-name" id="commentAuthorName"></span>
+                                <span class="comment-form-hint">Escreve a tua resposta...</span>
+                            </div>
+                        </div>
+                        
+                        <textarea 
+                            id="commentContent" 
+                            class="comment-textarea" 
+                            placeholder="Partilha a tua solução ou ajuda aqui..."
+                            rows="4"
+                            required
+                        ></textarea>
+
+                        <!-- FILE UPLOAD -->
+                        <div class="comment-upload-area">
+                            <div class="upload-preview-container" id="commentUploadPreview"></div>
+                            <label for="commentAttachments" class="upload-label">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                </svg>
+                                <span>Adicionar ficheiros</span>
+                            </label>
+                            <input 
+                                type="file" 
+                                id="commentAttachments" 
+                                name="attachments"
+                                accept="image/*,application/pdf"
+                                multiple
+                                class="upload-input-hidden"
+                            />
+                        </div>
+
+                        <div class="comment-form-actions">
+                            <button type="submit" class="btn-primary">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                </svg>
+                                <span>Publicar resposta</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- COMMENTS SORT -->
+                <div class="comments-sort-section">
+                    <label for="commentsSortSelect" class="comments-sort-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M7 12h10M11 18h2"/>
+                        </svg>
+                        <span>Ordenar por:</span>
+                        <select id="commentsSortSelect" class="comments-sort-select">
+                            <option value="best">Melhor</option>
+                            <option value="recent">Mais recentes</option>
+                        </select>
+                    </label>
+                </div>
+
+                <!-- COMMENTS LIST -->
+                <div class="comments-list" id="commentsList">
+                    <!-- Comentários serão carregados via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- MODAL DE CONFIRMAÇÃO -->
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-card modal-card-confirm">
+        <div class="modal-confirm-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+        </div>
+        <h3 class="modal-title" id="confirmModalTitle">Eliminar exercício?</h3>
+        <p class="modal-message" id="confirmModalMessage">Tens a certeza que queres eliminar este exercício? Esta ação não pode ser desfeita.</p>
+        <div class="modal-actions">
+            <button type="button" class="btn-outline" id="confirmModalCancel">Cancelar</button>
+            <button type="button" class="btn-primary delete" id="confirmModalConfirm">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE EDIÇÃO -->
+<div id="editExerciseModal" class="sh-modal-overlay hidden">
+    <div class="sh-modal">
+        <div class="sh-modal-header">
+            <h2>Editar exercício</h2>
+            <button class="sh-modal-close" id="editExerciseModalClose">&times;</button>
+        </div>
+
+        <form id="editExerciseForm" class="sh-modal-body">
+            <div class="form-grid">
+                <!-- COLUNA ESQUERDA: título + disciplina + tags -->
+                <div class="form-main">
+                    <div class="form-group">
+                        <label for="editExerciseTitle">Título</label>
+                        <input type="text" id="editExerciseTitle" name="title" required />
+                    </div>
+
+                    <!-- DISCIPLINAS EM PILLS -->
+                    <div class="form-group">
+                        <label>Disciplina</label>
+                        <div class="subject-pills" id="editExerciseSubjectPills">
+                            <button type="button" class="subject-pill" data-subject="Cálculo">Cálculo</button>
+                            <button type="button" class="subject-pill" data-subject="Base de Dados">Base de Dados</button>
+                            <button type="button" class="subject-pill" data-subject="Redes">Redes</button>
+                            <button type="button" class="subject-pill" data-subject="Sistemas">Sistemas</button>
+                            <button type="button" class="subject-pill" data-subject="Programação">Programação</button>
+                        </div>
+                        <input type="hidden" id="editExerciseSubject" name="subject" />
+                    </div>
+
+                    <!-- TAGS -->
+                    <div class="form-group">
+                        <label for="editExerciseTagInput">Tags</label>
+                        <div class="tags-input-wrapper">
+                            <div class="tags-list" id="editExerciseTagsList"></div>
+                            <input
+                                type="text"
+                                id="editExerciseTagInput"
+                                placeholder="Escreve uma tag e carrega em Enter"
+                            />
+                        </div>
+                        <small class="tags-hint">Ex.: álgebra, exame, 1º ano</small>
+                    </div>
+                </div>
+
+                <!-- COLUNA DIREITA: upload de ficheiros -->
+                <div class="form-side">
+                    <label>Imagens / PDFs</label>
+                    <div class="upload-card">
+                        <div class="upload-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                                <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                                <path d="M12 3v12m0 0l-4-4m4 4l4-4"/>
+                            </svg>
+                        </div>
+                        <p class="upload-title">Arrasta ficheiros aqui</p>
+                        <p class="upload-subtitle">ou <span>procura no teu dispositivo</span></p>
+
+                        <input
+                            type="file"
+                            id="editExerciseAttachments"
+                            name="attachments"
+                            accept="image/*,application/pdf"
+                            multiple
+                            class="upload-input"
+                        />
+
+                        <button type="button" class="upload-btn" id="editExerciseUploadTrigger">
+                            Escolher ficheiros
+                        </button>
+
+                        <p class="upload-hint">Imagens ou PDF, até 20 MB cada.</p>
+
+                        <div class="upload-previews" id="editExerciseUploadPreviews"></div>
+                        <ul class="upload-list" id="editExerciseUploadList"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DESCRIÇÃO -->
+            <div class="form-group">
+                <label for="editExerciseDescription">Descrição</label>
+                <textarea id="editExerciseDescription" name="description" rows="5" required></textarea>
+            </div>
+
+            <div class="sh-modal-footer">
+                <p id="editExerciseFormMessage" class="form-message"></p>
+                <div class="actions">
+                    <button type="button" class="btn-secondary" id="editExerciseCancel">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="editExerciseSubmit">
+                        <span class="btn-text">Guardar alterações</span>
+                        <div class="loading-spinner hidden" style="width: 16px; height: 16px; border-width: 2px; margin-left: 8px;"></div>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="./js/api.js"></script>
+<script src="./js/exercise.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+    // Inicializar notificações após carregar utilizador
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            await loadLoggedUser();
+            // Aguardar um pouco para garantir que o DOM está pronto
+            setTimeout(() => {
+                initNotifications();
+            }, 100);
+        } catch (err) {
+            // Se não houver utilizador, não inicializar notificações
+            console.log("Utilizador não autenticado, notificações não inicializadas");
+        }
+    });
+</script>
+
+</body>
+</html>
+
