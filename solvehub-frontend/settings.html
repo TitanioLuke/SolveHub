@@ -140,13 +140,6 @@
                         </svg>
                         <span>Aparência</span>
                     </a>
-
-                    <a class="settings-nav-item" data-section="privacy">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                        <span>Privacidade</span>
-                    </a>
                 </nav>
             </aside>
 
@@ -205,34 +198,87 @@
 
                     <div class="settings-card">
                         <h3>Alterar palavra-passe</h3>
-                        <div class="form-group">
-                            <label>Palavra-passe atual</label>
-                            <input type="password" placeholder="Introduz a palavra-passe atual">
-                        </div>
+                        <form id="changePasswordForm">
+                            <div class="form-group">
+                                <label>Palavra-passe atual</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="currentPassword" placeholder="Introduz a palavra-passe atual" required>
+                                    <button type="button" id="toggleCurrentPassword" class="toggle-password" aria-label="Mostrar palavra-passe">
+                                        <svg id="eyeIconCurrentPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Nova palavra-passe</label>
-                            <input type="password" placeholder="Mínimo 8 caracteres">
-                        </div>
+                            <div class="form-group">
+                                <label>Nova palavra-passe</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" required>
+                                    <button type="button" id="toggleNewPassword" class="toggle-password" aria-label="Mostrar palavra-passe">
+                                        <svg id="eyeIconNewPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Confirmar palavra-passe</label>
-                            <input type="password" placeholder="Repete a nova palavra-passe">
-                        </div>
+                            <!-- PASSWORD VALIDATION -->
+                            <div id="passwordValidationContainer" class="password-validation hidden">
+                                <div class="validation-header">
+                                    <p id="passwordValidationStatus" class="validation-status"></p>
+                                </div>
+                                <ul class="password-rules">
+                                    <li id="rule-length">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                        </svg>
+                                        Pelo menos 8 caracteres
+                                    </li>
+                                    <li id="rule-upper">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                        </svg>
+                                        Uma letra maiúscula
+                                    </li>
+                                    <li id="rule-number">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                        </svg>
+                                        Um número
+                                    </li>
+                                    <li id="rule-symbol">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                        </svg>
+                                        Um símbolo (!@#$%)
+                                    </li>
+                                </ul>
+                            </div>
 
-                        <div class="form-actions">
-                            <button class="btn-primary">
-                                <span>Atualizar palavra-passe</span>
-                            </button>
-                        </div>
-                    </div>
+                            <div class="form-group">
+                                <label>Confirmar palavra-passe</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="confirmNewPassword" placeholder="Repete a nova palavra-passe" required>
+                                    <button type="button" id="toggleConfirmPassword" class="toggle-password" aria-label="Mostrar palavra-passe">
+                                        <svg id="eyeIconConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
 
-                    <div class="settings-card danger-zone">
-                        <h3>Zona de perigo</h3>
-                        <p>Ações irreversíveis relacionadas com a tua conta</p>
-                        <div class="form-actions">
-                            <button class="btn-danger">Eliminar conta</button>
-                        </div>
+                            <p id="changePasswordMessage" class="form-message" style="display: none;"></p>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">
+                                    <span>Atualizar palavra-passe</span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </section>
 
@@ -270,17 +316,6 @@
                             <div class="setting-info">
                                 <h4>Votos</h4>
                                 <p>Recebe notificações quando alguém vota nas tuas respostas</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <h4>Email diário</h4>
-                                <p>Recebe um resumo diário por email</p>
                             </div>
                             <label class="toggle">
                                 <input type="checkbox">
@@ -334,50 +369,6 @@
                         </div>
                     </div>
                 </section>
-
-                <!-- PRIVACY SECTION -->
-                <section class="settings-section" id="privacy">
-                    <div class="section-header">
-                        <h2>Privacidade e Segurança</h2>
-                        <p>Gere as tuas preferências de privacidade</p>
-                    </div>
-
-                    <div class="settings-card">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <h4>Perfil público</h4>
-                                <p>O teu perfil pode ser visto por outros utilizadores</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <h4>Mostrar email</h4>
-                                <p>O teu email fica visível no perfil público</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <h4>Atividade</h4>
-                                <p>Outros utilizadores podem ver a tua atividade recente</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </section>
-
             </div>
         </div>
 
@@ -385,6 +376,7 @@
 </div>
 
 <!-- JS -->
+<script src="./js/api.js"></script>
 <script src="./js/settings.js"></script>
 <script src="./js/script.js"></script>
 

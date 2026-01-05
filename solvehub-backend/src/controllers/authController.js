@@ -121,3 +121,54 @@ exports.uploadAvatar = async (req, res) => {
     res.status(500).json({ message: "Erro ao atualizar avatar" });
   }
 };
+
+// ===============================
+// CHANGE PASSWORD
+// ===============================
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validar campos obrigatórios
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Palavra-passe atual e nova palavra-passe são obrigatórias" });
+    }
+
+    // Validar tamanho mínimo
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "A nova palavra-passe deve ter pelo menos 8 caracteres" });
+    }
+
+    // Buscar utilizador (com password para comparação)
+    const userId = req.user._id || req.user.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Utilizador não encontrado" });
+    }
+
+    // Verificar palavra-passe atual
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ message: "Palavra-passe atual incorreta" });
+    }
+
+    // Verificar que a nova palavra-passe é diferente da atual
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({ message: "A nova palavra-passe deve ser diferente da atual" });
+    }
+
+    // Hash da nova palavra-passe
+    const saltRounds = 10;
+    const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+
+    // Atualizar palavra-passe
+    user.password = newPasswordHash;
+    await user.save();
+
+    res.json({ message: "Palavra-passe atualizada com sucesso" });
+  } catch (error) {
+    console.error("Erro ao alterar palavra-passe:", error);
+    res.status(500).json({ message: "Erro ao alterar palavra-passe" });
+  }
+};

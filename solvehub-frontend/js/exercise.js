@@ -1219,25 +1219,52 @@ function updateCommentVotingUI(updatedAnswer, commentId) {
 // ===============================
 window.downloadFile = async function(url, filename) {
   try {
-    // Primeiro tentar download direto
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Garantir que o URL está completo
+    let fullUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      // Se o URL começa com /uploads, adicionar o domínio
+      if (url.startsWith('/uploads')) {
+        fullUrl = `http://localhost:5050${url}`;
+      } else {
+        // Se não começa com /, assumir que é relativo
+        fullUrl = `http://localhost:5050/${url}`;
+      }
+    }
+
+    // Tentar fazer fetch primeiro para verificar se o ficheiro existe
+    let response;
+    try {
+      response = await fetch(fullUrl, { method: 'HEAD' });
+    } catch (fetchError) {
+      console.error("Erro ao verificar ficheiro:", fetchError);
+      // Tentar abrir em nova aba como fallback
+      window.open(fullUrl, '_blank');
+      return;
+    }
     
-    // Se o download direto não funcionar, usar blob
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Erro ao carregar ficheiro');
+    if (!response.ok) {
+      // Se o ficheiro não existir (404), mostrar mensagem e tentar abrir em nova aba
+      if (response.status === 404) {
+        console.warn(`Ficheiro não encontrado no servidor: ${fullUrl}`);
+        alert(`O ficheiro "${filename || 'anexo'}" não foi encontrado no servidor. Pode ter sido removido.`);
+      }
+      // Tentar abrir em nova aba como fallback
+      window.open(fullUrl, '_blank');
+      return;
+    }
+
+    // Se o ficheiro existir, fazer download usando blob
+    const blobResponse = await fetch(fullUrl);
+    if (!blobResponse.ok) {
+      throw new Error(`Erro ao carregar ficheiro: ${blobResponse.status}`);
+    }
     
-    const blob = await response.blob();
+    const blob = await blobResponse.blob();
     const blobUrl = window.URL.createObjectURL(blob);
     
     const downloadLink = document.createElement('a');
     downloadLink.href = blobUrl;
-    downloadLink.download = filename;
+    downloadLink.download = filename || 'download';
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -1246,8 +1273,13 @@ window.downloadFile = async function(url, filename) {
     setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
   } catch (error) {
     console.error("Erro ao descarregar ficheiro:", error);
-    // Fallback: abrir em nova aba
-    window.open(url, '_blank');
+    // Fallback: tentar abrir em nova aba
+    try {
+      const fullUrl = url.startsWith('http') ? url : `http://localhost:5050${url.startsWith('/') ? url : '/' + url}`;
+      window.open(fullUrl, '_blank');
+    } catch (e) {
+      alert('Erro ao descarregar ficheiro. O ficheiro pode não existir no servidor.');
+    }
   }
 };
 

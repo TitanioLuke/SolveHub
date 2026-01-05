@@ -7,7 +7,8 @@ const {
   login,
   getMe,
   updateMe,
-  uploadAvatar
+  uploadAvatar,
+  changePassword
 } = require("../controllers/authController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -40,5 +41,6 @@ router.post("/login", login);
 router.get("/me", authMiddleware, getMe);
 router.put("/me", authMiddleware, updateMe);
 router.post("/me/avatar", authMiddleware, upload.single("avatar"), uploadAvatar);
+router.put("/password", authMiddleware, changePassword);
 
 module.exports = router;

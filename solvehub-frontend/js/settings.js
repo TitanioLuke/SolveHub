@@ -177,47 +177,223 @@ if (avatarBtn) {
 // ===============================
 //   PASSWORD CHANGE
 // ===============================
-const accountSection = document.getElementById('account');
-if (accountSection) {
-    const passwordBtn = accountSection.querySelector('.btn-primary');
+const changePasswordForm = document.getElementById('changePasswordForm');
+const changePasswordMessage = document.getElementById('changePasswordMessage');
 
-    if (passwordBtn) {
-        passwordBtn.addEventListener('click', async () => {
-            const inputs = accountSection.querySelectorAll('input[type="password"]');
-            const currentPassword = inputs[0].value;
-            const newPassword = inputs[1].value;
-            const confirmPassword = inputs[2].value;
+// Password validation state
+let validLength = false;
+let validUpper = false;
+let validNumber = false;
+let validSymbol = false;
 
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                alert('Por favor, preenche todos os campos.');
+if (changePasswordForm) {
+    const currentPasswordInput = document.getElementById('currentPassword');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmNewPasswordInput = document.getElementById('confirmNewPassword');
+    
+    const passwordValidationContainer = document.getElementById('passwordValidationContainer');
+    const passwordValidationStatus = document.getElementById('passwordValidationStatus');
+    const ruleLength = document.getElementById('rule-length');
+    const ruleUpper = document.getElementById('rule-upper');
+    const ruleNumber = document.getElementById('rule-number');
+    const ruleSymbol = document.getElementById('rule-symbol');
+
+    // ===============================
+    //   PASSWORD VALIDATION (REAL-TIME)
+    // ===============================
+    if (newPasswordInput && passwordValidationContainer) {
+        newPasswordInput.addEventListener('input', () => {
+            const value = newPasswordInput.value;
+
+            if (value.length === 0) {
+                passwordValidationContainer.classList.add('hidden');
+                passwordValidationStatus.textContent = '';
                 return;
             }
 
-            if (newPassword.length < 8) {
-                alert('A nova palavra-passe deve ter pelo menos 8 caracteres.');
-                return;
-            }
+            passwordValidationContainer.classList.remove('hidden');
 
-            if (newPassword !== confirmPassword) {
-                alert('As palavras-passe não coincidem.');
-                return;
-            }
+            validLength = /.{8,}/.test(value);
+            validUpper = /[A-Z]/.test(value);
+            validNumber = /\d/.test(value);
+            validSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(value);
 
-            const originalText = passwordBtn.innerHTML;
-            passwordBtn.innerHTML = '<span>A atualizar...</span>';
-            passwordBtn.disabled = true;
+            ruleLength.style.display = validLength ? 'none' : 'flex';
+            ruleUpper.style.display = validUpper ? 'none' : 'flex';
+            ruleNumber.style.display = validNumber ? 'none' : 'flex';
+            ruleSymbol.style.display = validSymbol ? 'none' : 'flex';
 
-            try {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                alert('Palavra-passe atualizada com sucesso!');
-                inputs.forEach(input => input.value = '');
-            } finally {
-                passwordBtn.innerHTML = originalText;
-                passwordBtn.disabled = false;
+            const missing = [
+                !validLength,
+                !validUpper,
+                !validNumber,
+                !validSymbol
+            ].filter(Boolean).length;
+
+            if (missing === 0) {
+                passwordValidationStatus.textContent = '✓ Password forte!';
+                passwordValidationStatus.style.color = '#16a34a';
+            } else if (missing === 1) {
+                passwordValidationStatus.textContent = '⚠ Quase lá… falta 1 requisito.';
+                passwordValidationStatus.style.color = '#f59e0b';
+            } else {
+                passwordValidationStatus.textContent = '✗ Password fraca (faltam vários requisitos).';
+                passwordValidationStatus.style.color = '#dc2626';
             }
         });
     }
 
+    // ===============================
+    //   TOGGLE PASSWORD VISIBILITY
+    // ===============================
+    const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+    const eyeIconCurrentPassword = document.getElementById('eyeIconCurrentPassword');
+    
+    if (toggleCurrentPassword && currentPasswordInput && eyeIconCurrentPassword) {
+        toggleCurrentPassword.addEventListener('click', () => {
+            const isPassword = currentPasswordInput.type === 'password';
+            currentPasswordInput.type = isPassword ? 'text' : 'password';
+            
+            eyeIconCurrentPassword.innerHTML = isPassword
+                ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/>'
+                : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            
+            toggleCurrentPassword.setAttribute('aria-label', isPassword ? 'Esconder palavra-passe' : 'Mostrar palavra-passe');
+        });
+    }
+
+    const toggleNewPassword = document.getElementById('toggleNewPassword');
+    const eyeIconNewPassword = document.getElementById('eyeIconNewPassword');
+    
+    if (toggleNewPassword && newPasswordInput && eyeIconNewPassword) {
+        toggleNewPassword.addEventListener('click', () => {
+            const isPassword = newPasswordInput.type === 'password';
+            newPasswordInput.type = isPassword ? 'text' : 'password';
+            
+            eyeIconNewPassword.innerHTML = isPassword
+                ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/>'
+                : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            
+            toggleNewPassword.setAttribute('aria-label', isPassword ? 'Esconder palavra-passe' : 'Mostrar palavra-passe');
+        });
+    }
+
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const eyeIconConfirmPassword = document.getElementById('eyeIconConfirmPassword');
+    
+    if (toggleConfirmPassword && confirmNewPasswordInput && eyeIconConfirmPassword) {
+        toggleConfirmPassword.addEventListener('click', () => {
+            const isPassword = confirmNewPasswordInput.type === 'password';
+            confirmNewPasswordInput.type = isPassword ? 'text' : 'password';
+            
+            eyeIconConfirmPassword.innerHTML = isPassword
+                ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/>'
+                : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            
+            toggleConfirmPassword.setAttribute('aria-label', isPassword ? 'Esconder palavra-passe' : 'Mostrar palavra-passe');
+        });
+    }
+
+    // ===============================
+    //   FORM SUBMIT
+    // ===============================
+    changePasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Verificar token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'auth.html';
+            return;
+        }
+
+        const submitBtn = changePasswordForm.querySelector('button[type="submit"]');
+
+        const currentPassword = currentPasswordInput.value.trim();
+        const newPassword = newPasswordInput.value.trim();
+        const confirmPassword = confirmNewPasswordInput.value.trim();
+
+        // Validar campos obrigatórios
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            showPasswordMessage('Por favor, preenche todos os campos.', 'error');
+            return;
+        }
+
+        // Validar força da password
+        const strongPassword = validLength && validUpper && validNumber && validSymbol;
+        if (!strongPassword) {
+            showPasswordMessage('A nova palavra-passe não cumpre os requisitos de segurança.', 'error');
+            return;
+        }
+
+        // Validar confirmação
+        if (newPassword !== confirmPassword) {
+            showPasswordMessage('As palavras-passe não coincidem.', 'error');
+            return;
+        }
+
+        // Validar que não é igual à atual
+        if (currentPassword === newPassword) {
+            showPasswordMessage('A nova palavra-passe deve ser diferente da atual.', 'error');
+            return;
+        }
+
+        // Desabilitar botão e mostrar loading
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span>A atualizar...</span>';
+        submitBtn.disabled = true;
+        hidePasswordMessage();
+
+        try {
+            await apiPut('/auth/password', {
+                currentPassword,
+                newPassword
+            });
+
+            // Sucesso
+            showPasswordMessage('Palavra-passe atualizada com sucesso!', 'success');
+            currentPasswordInput.value = '';
+            newPasswordInput.value = '';
+            confirmNewPasswordInput.value = '';
+            
+            // Esconder validação
+            if (passwordValidationContainer) {
+                passwordValidationContainer.classList.add('hidden');
+            }
+            
+            // Reset validation state
+            validLength = false;
+            validUpper = false;
+            validNumber = false;
+            validSymbol = false;
+        } catch (error) {
+            // Erro
+            const message = error.message || 'Erro ao atualizar palavra-passe. Tenta novamente.';
+            showPasswordMessage(message, 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+function showPasswordMessage(message, type) {
+    if (!changePasswordMessage) return;
+    
+    changePasswordMessage.textContent = message;
+    changePasswordMessage.className = `form-message ${type === 'success' ? 'success' : 'error'}`;
+    changePasswordMessage.style.display = 'block';
+}
+
+function hidePasswordMessage() {
+    if (changePasswordMessage) {
+        changePasswordMessage.style.display = 'none';
+    }
+}
+
+// Eliminar conta
+const accountSection = document.getElementById('account');
+if (accountSection) {
     const deleteBtn = accountSection.querySelector('.btn-danger');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
