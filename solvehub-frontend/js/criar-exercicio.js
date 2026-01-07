@@ -81,8 +81,12 @@ async function openModal() {
       subjectPillsContainer.innerHTML = '<p style="color: var(--text-error, #ef4444); font-size: 13px;">Erro ao carregar disciplinas. Recarrega a página.</p>';
     }
     if (messageEl) {
-      messageEl.textContent = 'Erro ao carregar disciplinas. Tenta novamente.';
-      messageEl.className = 'form-message error';
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error('Erro ao carregar disciplinas. Tenta novamente.', null, 4000);
+      } else {
+        messageEl.textContent = 'Erro ao carregar disciplinas. Tenta novamente.';
+        messageEl.className = 'form-message error';
+      }
     }
   }
 
@@ -197,20 +201,31 @@ form.addEventListener('submit', async (e) => {
     const created = await res.json();
     console.log('Exercício criado COM FOTOS:', created);
 
-    messageEl.textContent = 'Exercício criado com sucesso!';
-    messageEl.className = 'form-message success';
+    // Toast de sucesso
+    if (typeof toast !== 'undefined' && toast.success) {
+      toast.success('Exercício criado com sucesso!', null, 3000);
+    } else {
+      messageEl.textContent = 'Exercício criado com sucesso!';
+      messageEl.className = 'form-message success';
+    }
 
     setTimeout(() => {
       closeModal();
       if (typeof loadExercises === 'function') {
         loadExercises();
       }
-    }, 1500);
+    }, 1000);
 
   } catch (err) {
     console.error(err);
-    messageEl.textContent = err.message;
-    messageEl.className = 'form-message error';
+    
+    // Toast de erro
+    if (typeof toast !== 'undefined' && toast.error) {
+      toast.error(err.message || 'Erro ao criar exercício', 'Erro', 5000);
+    } else {
+      messageEl.textContent = err.message;
+      messageEl.className = 'form-message error';
+    }
   }
 });
 

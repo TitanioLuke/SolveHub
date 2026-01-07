@@ -639,7 +639,11 @@ async function setupSaveButton(exerciseId) {
 // ===============================
 async function toggleSaveExercise(exerciseId, buttonEl, textEl) {
   if (!currentUser) {
-    alert("Precisas de estar autenticado para guardar exercícios.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para guardar exercícios.', 'Acesso Negado');
+    } else {
+      alert("Precisas de estar autenticado para guardar exercícios.");
+    }
     return;
   }
 
@@ -679,7 +683,11 @@ async function toggleSaveExercise(exerciseId, buttonEl, textEl) {
       textEl.textContent = "Guardado";
       buttonEl.title = "Tirar de guardado";
     } else {
-      alert(error?.message || "Erro ao guardar exercício. Tenta novamente.");
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error(error?.message || "Erro ao guardar exercício. Tenta novamente.", 'Erro');
+      } else {
+        alert(error?.message || "Erro ao guardar exercício. Tenta novamente.");
+      }
       textEl.textContent = originalText;
     }
   } finally {
@@ -1250,7 +1258,11 @@ window.toggleReplies = function(commentId) {
 // ===============================
 window.showReplyForm = function(commentId) {
   if (!currentUser) {
-    alert("Precisas de estar autenticado para responder.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para responder.', 'Acesso Negado');
+    } else {
+      alert("Precisas de estar autenticado para responder.");
+    }
     return;
   }
   
@@ -1330,13 +1342,21 @@ window.cancelReply = function(commentId) {
 // ===============================
 window.submitReply = async function(commentId) {
   if (!currentUser) {
-    alert("Precisas de estar autenticado para responder.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para responder.', 'Acesso Negado');
+    } else {
+      alert("Precisas de estar autenticado para responder.");
+    }
     return;
   }
 
   const content = document.getElementById(`reply-content-${commentId}`)?.value.trim();
   if (!content) {
-    alert("A resposta não pode estar vazia.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('A resposta não pode estar vazia.', 'Validação');
+    } else {
+      alert("A resposta não pode estar vazia.");
+    }
     return;
   }
 
@@ -1360,6 +1380,9 @@ window.submitReply = async function(commentId) {
   try {
     const response = await apiPostFormData("/answers", formData);
     console.log("Resposta criada com sucesso:", response);
+    if (typeof toast !== 'undefined' && toast.success) {
+      toast.success('Resposta publicada com sucesso!', null, 3000);
+    }
     
     // Limpar formulário mas manter o estado para não fechar
     const formContainer = document.getElementById(`reply-form-${commentId}`);
@@ -1384,7 +1407,11 @@ window.submitReply = async function(commentId) {
     });
     // Não mostrar alerta se o erro for apenas de rede mas a resposta foi criada
     if (error.message && !error.message.includes("Failed to fetch")) {
-      alert(error.message || "Erro ao publicar resposta. Tenta novamente.");
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error(error.message || "Erro ao publicar resposta. Tenta novamente.", 'Erro');
+      } else {
+        alert(error.message || "Erro ao publicar resposta. Tenta novamente.");
+      }
     }
   }
 };
@@ -1396,13 +1423,21 @@ async function submitComment(e) {
   e.preventDefault();
 
   if (!currentUser) {
-    alert("Precisas de estar autenticado para comentar.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para comentar.', 'Acesso Negado');
+    } else {
+      alert("Precisas de estar autenticado para comentar.");
+    }
     return;
   }
 
   const content = document.getElementById("commentContent").value.trim();
   if (!content) {
-    alert("O comentário não pode estar vazio.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('O comentário não pode estar vazio.', 'Validação');
+    } else {
+      alert("O comentário não pode estar vazio.");
+    }
     return;
   }
 
@@ -1438,7 +1473,11 @@ async function submitComment(e) {
     console.error("Erro ao criar comentário:", error);
     // Não mostrar alerta se o erro for apenas de rede mas a resposta foi criada
     if (error.message && !error.message.includes("Failed to fetch")) {
-      alert(error.message || "Erro ao publicar comentário. Tenta novamente.");
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error(error.message || "Erro ao publicar comentário. Tenta novamente.", 'Erro');
+      } else {
+        alert(error.message || "Erro ao publicar comentário. Tenta novamente.");
+      }
     }
   } finally {
     submitBtn.disabled = false;
@@ -1451,7 +1490,11 @@ async function submitComment(e) {
 // ===============================
 window.toggleLike = async function(commentId) {
   if (!currentUser) {
-    alert("Precisas de estar autenticado para dar like.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para dar like.', 'Acesso Negado');
+    } else {
+      alert("Precisas de estar autenticado para dar like.");
+    }
     return;
   }
 
@@ -1466,7 +1509,11 @@ window.toggleLike = async function(commentId) {
     updateCommentVotingUI(updatedAnswer, commentId);
   } catch (error) {
     console.error("Erro ao dar like:", error);
-    alert(error.message || "Erro ao atualizar like.");
+    if (typeof toast !== 'undefined' && toast.error) {
+      toast.error(error.message || "Erro ao atualizar like.", 'Erro');
+    } else {
+      alert(error.message || "Erro ao atualizar like.");
+    }
   } finally {
     if (likeBtn) likeBtn.disabled = false;
     if (dislikeBtn) dislikeBtn.disabled = false;
@@ -1478,7 +1525,11 @@ window.toggleLike = async function(commentId) {
 // ===============================
 window.toggleDislike = async function(commentId) {
   if (!currentUser) {
-    alert("Precisas de estar autenticado para dar dislike.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para dar dislike.', 'Acesso Negado');
+    } else {
+      alert("Precisas de estar autenticado para dar dislike.");
+    }
     return;
   }
 
@@ -1493,7 +1544,11 @@ window.toggleDislike = async function(commentId) {
     updateCommentVotingUI(updatedAnswer, commentId);
   } catch (error) {
     console.error("Erro ao dar dislike:", error);
-    alert(error.message || "Erro ao atualizar dislike.");
+    if (typeof toast !== 'undefined' && toast.error) {
+      toast.error(error.message || "Erro ao atualizar dislike.", 'Erro');
+    } else {
+      alert(error.message || "Erro ao atualizar dislike.");
+    }
   } finally {
     if (likeBtn) likeBtn.disabled = false;
     if (dislikeBtn) dislikeBtn.disabled = false;
@@ -1658,7 +1713,11 @@ window.downloadFile = async function(url, filename) {
         // Se não conseguir, tentar abrir em nova aba
         if (blobResponse.status === 404) {
           console.warn(`Ficheiro não encontrado: ${fullUrl}`);
-          alert(`O ficheiro "${filename || 'anexo'}" não foi encontrado.`);
+          if (typeof toast !== 'undefined' && toast.warning) {
+        toast.warning(`O ficheiro "${filename || 'anexo'}" não foi encontrado.`, 'Ficheiro não encontrado');
+      } else {
+        alert(`O ficheiro "${filename || 'anexo'}" não foi encontrado.`);
+      }
         }
         window.open(fullUrl, '_blank');
         return;
@@ -1693,7 +1752,11 @@ window.downloadFile = async function(url, filename) {
       const fullUrl = url.startsWith('http') ? url : (typeof resolveUrl !== 'undefined' ? resolveUrl(url) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${url.startsWith('/') ? url : '/' + url}`);
       window.open(fullUrl, '_blank');
     } catch (e) {
-      alert('Erro ao descarregar ficheiro. Tenta abrir o ficheiro diretamente.');
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error('Erro ao descarregar ficheiro. Tenta abrir o ficheiro diretamente.', 'Erro');
+      } else {
+        alert('Erro ao descarregar ficheiro. Tenta abrir o ficheiro diretamente.');
+      }
     }
   }
 };
@@ -1731,7 +1794,11 @@ function attachVotingButtonListeners(exerciseId) {
     console.log(`${action.toUpperCase()} BUTTON CLICKED for exercise:`, btnExerciseId);
     
     if (!currentUser) {
-      alert(`Precisas de estar autenticado para dar ${action === 'like' ? 'like' : 'dislike'}.`);
+      if (typeof toast !== 'undefined' && toast.warning) {
+        toast.warning(`Precisas de estar autenticado para dar ${action === 'like' ? 'like' : 'dislike'}.`, 'Acesso Negado');
+      } else {
+        alert(`Precisas de estar autenticado para dar ${action === 'like' ? 'like' : 'dislike'}.`);
+      }
       return;
     }
     
@@ -1747,7 +1814,11 @@ function attachVotingButtonListeners(exerciseId) {
       updateExerciseVotingUI(updatedExercise, btnExerciseId);
     } catch (error) {
       console.error(`Erro ao dar ${action}:`, error);
-      alert(error.message || `Erro ao atualizar ${action}.`);
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error(error.message || `Erro ao atualizar ${action}.`, 'Erro');
+      } else {
+        alert(error.message || `Erro ao atualizar ${action}.`);
+      }
     } finally {
       if (likeBtn) likeBtn.disabled = false;
       if (dislikeBtn) dislikeBtn.disabled = false;
@@ -2416,7 +2487,11 @@ if (document.getElementById("reportModal")) {
     const details = document.getElementById("reportDetailsTextarea").value.trim();
 
     if (!reason) {
-      alert("Seleciona um motivo.");
+      if (typeof toast !== 'undefined' && toast.warning) {
+        toast.warning('Seleciona um motivo.', 'Validação');
+      } else {
+        alert("Seleciona um motivo.");
+      }
       return;
     }
 
@@ -2436,10 +2511,18 @@ if (document.getElementById("reportModal")) {
       document.getElementById("reportForm").reset();
       document.getElementById("reportCharCount").textContent = "0";
       reportModalTarget = null;
-      alert("Report enviado com sucesso. Obrigado!");
+      if (typeof toast !== 'undefined' && toast.success) {
+        toast.success('Report enviado com sucesso. Obrigado!', null, 4000);
+      } else {
+        alert("Report enviado com sucesso. Obrigado!");
+      }
     } catch (err) {
       console.error("Erro ao enviar report:", err);
-      alert(err.message || "Erro ao enviar report.");
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error(err.message || "Erro ao enviar report.", 'Erro', 5000);
+      } else {
+        alert(err.message || "Erro ao enviar report.");
+      }
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Enviar";
@@ -2781,8 +2864,12 @@ function openEditExerciseModal(exercise) {
     const subjectId = subjectIdHiddenInput.value;
 
     if (!title || !description || (!subject && !subjectId)) {
-      formMessageEl.textContent = "Título, descrição e disciplina são obrigatórios.";
-      formMessageEl.className = "form-message error";
+      if (typeof toast !== 'undefined' && toast.warning) {
+        toast.warning('Título, descrição e disciplina são obrigatórios.', 'Validação');
+      } else {
+        formMessageEl.textContent = "Título, descrição e disciplina são obrigatórios.";
+        formMessageEl.className = "form-message error";
+      }
       return;
     }
 
@@ -2850,16 +2937,24 @@ function openEditExerciseModal(exercise) {
         }
       }
 
-      formMessageEl.textContent = "Exercício atualizado com sucesso!";
-      formMessageEl.className = "form-message success";
+      if (typeof toast !== 'undefined' && toast.success) {
+        toast.success('Exercício atualizado com sucesso!', null, 3000);
+      } else {
+        formMessageEl.textContent = "Exercício atualizado com sucesso!";
+        formMessageEl.className = "form-message success";
+      }
 
       setTimeout(() => {
         closeModal();
-      }, 1500);
+      }, 1000);
     } catch (error) {
       console.error("Erro ao atualizar exercício:", error);
-      formMessageEl.textContent = error.message || "Erro ao atualizar exercício. Tenta novamente.";
-      formMessageEl.className = "form-message error";
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error(error.message || "Erro ao atualizar exercício. Tenta novamente.", 'Erro', 5000);
+      } else {
+        formMessageEl.textContent = error.message || "Erro ao atualizar exercício. Tenta novamente.";
+        formMessageEl.className = "form-message error";
+      }
     } finally {
       // Reabilitar botão
       submitBtn.disabled = false;
@@ -2878,12 +2973,20 @@ function openEditExerciseModal(exercise) {
 // ===============================
 window.editExercise = async function(exerciseId) {
   if (!currentUser) {
-    alert("Precisas de estar autenticado para editar exercícios.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para editar exercícios.', 'Acesso Negado');
+    } else {
+      alert("Precisas de estar autenticado para editar exercícios.");
+    }
     return;
   }
 
   if (!currentExercise || currentExercise._id !== exerciseId) {
-    alert("Erro: exercício não encontrado.");
+    if (typeof toast !== 'undefined' && toast.error) {
+      toast.error('Exercício não encontrado.', 'Erro');
+    } else {
+      alert("Erro: exercício não encontrado.");
+    }
     return;
   }
 
@@ -2895,7 +2998,11 @@ window.editExercise = async function(exerciseId) {
 // ===============================
 window.deleteExercise = async function(exerciseId) {
   if (!currentUser) {
-    alert("Precisas de estar autenticado para apagar exercícios.");
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para apagar exercícios.', 'Acesso Negado');
+    } else {
+      alert("Precisas de estar autenticado para apagar exercícios.");
+    }
     return;
   }
 
@@ -2923,11 +3030,19 @@ window.deleteExercise = async function(exerciseId) {
     try {
       await apiDelete(`/exercises/${exerciseId}`);
       if (modal) modal.classList.add("hidden");
-      alert("Exercício apagado com sucesso!");
+      if (typeof toast !== 'undefined' && toast.success) {
+        toast.success('Exercício apagado com sucesso!', null, 3000);
+      } else {
+        alert("Exercício apagado com sucesso!");
+      }
       window.location.href = "index.html";
     } catch (error) {
       console.error("Erro ao apagar exercício:", error);
-      alert(error.message || "Erro ao apagar exercício. Tenta novamente.");
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error(error.message || "Erro ao apagar exercício. Tenta novamente.", 'Erro', 5000);
+      } else {
+        alert(error.message || "Erro ao apagar exercício. Tenta novamente.");
+      }
       if (confirmBtn) {
         confirmBtn.disabled = false;
         confirmBtn.textContent = originalText;
@@ -2937,11 +3052,19 @@ window.deleteExercise = async function(exerciseId) {
     // Fallback se não encontrar o botão
     try {
       await apiDelete(`/exercises/${exerciseId}`);
-      alert("Exercício apagado com sucesso!");
+      if (typeof toast !== 'undefined' && toast.success) {
+        toast.success('Exercício apagado com sucesso!', null, 3000);
+      } else {
+        alert("Exercício apagado com sucesso!");
+      }
       window.location.href = "index.html";
     } catch (error) {
       console.error("Erro ao apagar exercício:", error);
-      alert(error.message || "Erro ao apagar exercício. Tenta novamente.");
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error(error.message || "Erro ao apagar exercício. Tenta novamente.", 'Erro', 5000);
+      } else {
+        alert(error.message || "Erro ao apagar exercício. Tenta novamente.");
+      }
     }
   }
 };

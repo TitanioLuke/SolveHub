@@ -76,7 +76,11 @@ if (profileSection) {
             const bio = document.getElementById('bio').value.trim();
 
             if (!username || !email) {
-                alert('Por favor, preenche todos os campos obrigatórios.');
+                if (typeof toast !== 'undefined' && toast.warning) {
+                  toast.warning('Por favor, preenche todos os campos obrigatórios.', 'Validação');
+                } else {
+                  alert('Por favor, preenche todos os campos obrigatórios.');
+                }
                 return;
             }
 
@@ -103,11 +107,19 @@ if (profileSection) {
                 if (profileName) profileName.textContent = user.username;
 
                 updateAvatar(user);
-                alert('Perfil atualizado com sucesso!');
+                if (typeof toast !== 'undefined' && toast.success) {
+                  toast.success('Perfil atualizado com sucesso!', null, 3000);
+                } else {
+                  alert('Perfil atualizado com sucesso!');
+                }
 
             } catch (error) {
                 console.error(error);
-                alert('Erro ao atualizar perfil. Tenta novamente.');
+                if (typeof toast !== 'undefined' && toast.error) {
+                  toast.error('Erro ao atualizar perfil. Tenta novamente.', 'Erro', 5000);
+                } else {
+                  alert('Erro ao atualizar perfil. Tenta novamente.');
+                }
             } finally {
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
@@ -170,7 +182,11 @@ if (avatarBtn) {
             }
 
         } catch {
-            alert('Erro ao atualizar foto de perfil');
+            if (typeof toast !== 'undefined' && toast.error) {
+              toast.error('Erro ao atualizar foto de perfil', 'Erro', 5000);
+            } else {
+              alert('Erro ao atualizar foto de perfil');
+            }
         }
     });
 }
@@ -502,7 +518,11 @@ async function loadNotificationSettings() {
 async function updateNotificationSetting(settingKey, value) {
   const token = localStorage.getItem('token');
   if (!token) {
-    alert('Precisas de estar autenticado para alterar preferências.');
+    if (typeof toast !== 'undefined' && toast.warning) {
+      toast.warning('Precisas de estar autenticado para alterar preferências.', 'Acesso Negado');
+    } else {
+      alert('Precisas de estar autenticado para alterar preferências.');
+    }
     return;
   }
 
@@ -513,7 +533,11 @@ async function updateNotificationSetting(settingKey, value) {
     await apiPut('/auth/me/notification-settings', notificationSettings);
   } catch (error) {
     console.error('Erro ao guardar preferências:', error);
-    alert(error?.message || 'Erro ao guardar preferências. Tenta novamente.');
+    if (typeof toast !== 'undefined' && toast.error) {
+      toast.error(error?.message || 'Erro ao guardar preferências. Tenta novamente.', 'Erro', 5000);
+    } else {
+      alert(error?.message || 'Erro ao guardar preferências. Tenta novamente.');
+    }
     
     // Reverter toggle
     const toggle = document.querySelector(`[data-setting="${settingKey}"]`);

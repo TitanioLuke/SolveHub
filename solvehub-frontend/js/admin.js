@@ -363,12 +363,20 @@ async function handleEditSubmit(e) {
     const isPopular = isPopularInput ? isPopularInput.checked : false;
 
     if (!name) {
-        alert("O nome é obrigatório.");
+        if (typeof toast !== 'undefined' && toast.warning) {
+          toast.warning('O nome é obrigatório.', 'Validação');
+        } else {
+          alert("O nome é obrigatório.");
+        }
         return;
     }
 
     if (name.length > 100) {
-        alert("O nome não pode ter mais de 100 caracteres.");
+        if (typeof toast !== 'undefined' && toast.warning) {
+          toast.warning('O nome não pode ter mais de 100 caracteres.', 'Validação');
+        } else {
+          alert("O nome não pode ter mais de 100 caracteres.");
+        }
         return;
     }
 
@@ -392,7 +400,11 @@ async function handleEditSubmit(e) {
         loadTab(currentTab);
     } catch (err) {
         console.error("Erro ao guardar:", err);
-        alert(err.message || "Erro ao guardar.");
+        if (typeof toast !== 'undefined' && toast.error) {
+          toast.error(err.message || "Erro ao guardar.", 'Erro', 5000);
+        } else {
+          alert(err.message || "Erro ao guardar.");
+        }
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = "Guardar";
@@ -418,7 +430,11 @@ async function deleteSubject(id) {
         }
     } catch (err) {
         console.error("Erro ao remover disciplina:", err);
-        alert(err.message || "Erro ao remover disciplina.");
+        if (typeof toast !== 'undefined' && toast.error) {
+          toast.error(err.message || "Erro ao remover disciplina.", 'Erro', 5000);
+        } else {
+          alert(err.message || "Erro ao remover disciplina.");
+        }
     }
 }
 
@@ -559,7 +575,11 @@ async function resolveReport(id) {
         loadReports();
     } catch (err) {
         console.error("Erro ao resolver report:", err);
-        alert(err.message || "Erro ao resolver report.");
+        if (typeof toast !== 'undefined' && toast.error) {
+          toast.error(err.message || "Erro ao resolver report.", 'Erro', 5000);
+        } else {
+          alert(err.message || "Erro ao resolver report.");
+        }
     }
 }
 
@@ -586,7 +606,11 @@ async function deleteReport(id) {
         loadReports();
     } catch (err) {
         console.error("Erro ao remover report:", err);
-        alert(err.message || "Erro ao remover report.");
+        if (typeof toast !== 'undefined' && toast.error) {
+          toast.error(err.message || "Erro ao remover report.", 'Erro', 5000);
+        } else {
+          alert(err.message || "Erro ao remover report.");
+        }
     }
 }
 
@@ -721,7 +745,11 @@ async function handleRoleSubmit(e) {
         loadUsers(document.getElementById("userSearchInput")?.value || "");
     } catch (err) {
         console.error("Erro ao alterar role:", err);
-        alert(err.message || "Erro ao alterar role.");
+        if (typeof toast !== 'undefined' && toast.error) {
+          toast.error(err.message || "Erro ao alterar role.", 'Erro', 5000);
+        } else {
+          alert(err.message || "Erro ao alterar role.");
+        }
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = "Guardar";
@@ -756,7 +784,11 @@ async function handleReportSubmit(e) {
     const details = document.getElementById("reportDetailsTextarea").value.trim();
 
     if (!reason) {
-        alert("Seleciona um motivo.");
+        if (typeof toast !== 'undefined' && toast.warning) {
+          toast.warning('Seleciona um motivo.', 'Validação');
+        } else {
+          alert("Seleciona um motivo.");
+        }
         return;
     }
 
@@ -775,10 +807,18 @@ async function handleReportSubmit(e) {
         });
 
         closeReportModal();
-        alert("Report enviado com sucesso. Obrigado!");
+        if (typeof toast !== 'undefined' && toast.success) {
+          toast.success('Report enviado com sucesso. Obrigado!', null, 4000);
+        } else {
+          alert("Report enviado com sucesso. Obrigado!");
+        }
     } catch (err) {
         console.error("Erro ao enviar report:", err);
-        alert(err.message || "Erro ao enviar report.");
+        if (typeof toast !== 'undefined' && toast.error) {
+          toast.error(err.message || "Erro ao enviar report.", 'Erro', 5000);
+        } else {
+          alert(err.message || "Erro ao enviar report.");
+        }
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = "Enviar";

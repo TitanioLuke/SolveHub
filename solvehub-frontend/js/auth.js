@@ -295,7 +295,11 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        showMessage(loginError, "✓ Login bem-sucedido! A redirecionar...", false);
+        if (typeof toast !== 'undefined' && toast.success) {
+          toast.success('Login bem-sucedido! A redirecionar...', 'Bem-vindo', 2000);
+        } else {
+          showMessage(loginError, "✓ Login bem-sucedido! A redirecionar...", false);
+        }
 
         setTimeout(() => {
             window.location.href = "index.html";
