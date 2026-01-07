@@ -41,7 +41,7 @@ function updateAvatar(user) {
     const avatarLarge = document.querySelector('.avatar-large');
 
     if (user.avatar) {
-        const img = `<img src="http://localhost:5050${user.avatar}" />`;
+        const img = `<img src="${typeof resolveUrl !== 'undefined' ? resolveUrl(user.avatar) : (typeof API_URL !== 'undefined' ? API_URL + user.avatar : 'http://localhost:5050' + user.avatar)}" />`;
         if (avatar) avatar.innerHTML = img;
         if (avatarLarge) avatarLarge.innerHTML = img;
         return;

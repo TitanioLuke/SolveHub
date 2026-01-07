@@ -162,9 +162,30 @@ async function apiDelete(path) {
     return res.json().catch(() => null);
 }
 
+/**
+ * Resolve uma URL completa para um recurso (imagem, ficheiro, etc.)
+ * Se a URL já começa com http/https (Cloudinary ou URL completa), retorna diretamente
+ * Senão, adiciona o prefixo da API (para anexos locais antigos)
+ * @param {string} url - URL relativa ou completa
+ * @returns {string} - URL completa
+ */
+function resolveUrl(url) {
+  if (!url) return "";
+  
+  // Se já é uma URL completa (Cloudinary ou qualquer URL externa), usar diretamente
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // Se começa com /uploads ou qualquer caminho relativo, adicionar prefixo da API
+  return API_URL + (url.startsWith('/') ? url : '/' + url);
+}
+
 // Tornar apiGet global para uso em outros scripts
 window.apiGet = apiGet;
 window.apiPost = apiPost;
 window.apiPostFormData = apiPostFormData;
 window.apiPut = apiPut;
 window.apiDelete = apiDelete;
+window.resolveUrl = resolveUrl;
+window.API_URL = API_URL; // Exportar API_URL também

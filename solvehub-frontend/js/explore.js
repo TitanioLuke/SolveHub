@@ -29,7 +29,7 @@ async function loadLoggedUser() {
       if (user.avatar && user.avatar.trim() !== "") {
         avatar.textContent = "";
         const img = document.createElement("img");
-        img.src = `http://localhost:5050${user.avatar}`;
+        img.src = typeof resolveUrl !== 'undefined' ? resolveUrl(user.avatar) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${user.avatar}`;
         img.alt = user.username || 'Avatar';
         img.style.width = "100%";
         img.style.height = "100%";
@@ -405,9 +405,11 @@ function renderExercisesList(exercises) {
                     .map(
                       (att) => {
                         if (att.type === 'image') {
+                          // Usar resolveUrl para URLs do Cloudinary ou anexos locais
+                          const imageUrl = typeof resolveUrl !== 'undefined' ? resolveUrl(att.url) : (att.url && (att.url.startsWith('http://') || att.url.startsWith('https://')) ? att.url : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${att.url}`);
                           return `
                             <img
-                              src="http://localhost:5050${att.url}"
+                              src="${imageUrl}"
                               alt="${escapeHtml(att.filename)}"
                               class="attachment-thumb"
                               loading="lazy"

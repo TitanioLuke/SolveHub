@@ -70,7 +70,7 @@ function updateAvatarDisplay(user) {
     if (!avatar) return;
 
     if (user.avatar && user.avatar.trim() !== "") {
-        avatar.innerHTML = `<img src="http://localhost:5050${user.avatar}" alt="${user.username}" />`;
+        avatar.innerHTML = `<img src="${typeof resolveUrl !== 'undefined' ? resolveUrl(user.avatar) : (typeof API_URL !== 'undefined' ? API_URL + user.avatar : 'http://localhost:5050' + user.avatar)}" alt="${user.username}" />`;
     } else {
         const initials = user.username
             ? user.username.trim().split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase()

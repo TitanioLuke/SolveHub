@@ -70,7 +70,7 @@ async function loadLoggedUser() {
       if (user.avatar && user.avatar.trim() !== "") {
         // Criar elemento img
         const img = document.createElement("img");
-        img.src = `http://localhost:5050${user.avatar}`;
+        img.src = typeof resolveUrl !== 'undefined' ? resolveUrl(user.avatar) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${user.avatar}`;
         img.alt = user.username || 'Avatar';
         img.style.width = "100%";
         img.style.height = "100%";
@@ -142,7 +142,7 @@ function updateAvatarDisplay(user) {
     avatar.textContent = "";
     // Criar elemento img
     const img = document.createElement("img");
-    img.src = `http://localhost:5050${user.avatar}`;
+    img.src = typeof resolveUrl !== 'undefined' ? resolveUrl(user.avatar) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${user.avatar}`;
     img.alt = user.username || 'Avatar';
     img.style.width = "100%";
     img.style.height = "100%";
@@ -314,7 +314,8 @@ function renderExercise(exercise) {
   const attachmentsHtml = exercise.attachments && exercise.attachments.length > 0
     ? `<div class="exercise-attachments-grid">
         ${exercise.attachments.map(att => {
-          const fileUrl = `http://localhost:5050${att.url}`;
+          // Usar resolveUrl para URLs do Cloudinary ou anexos locais
+          const fileUrl = typeof resolveUrl !== 'undefined' ? resolveUrl(att.url) : (att.url && (att.url.startsWith('http://') || att.url.startsWith('https://')) ? att.url : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${att.url}`);
           if (att.type === 'image') {
             return `<div class="attachment-card">
               <img src="${fileUrl}" alt="${att.filename}" class="attachment-preview" />
@@ -906,7 +907,7 @@ function renderComment(comment) {
   
   // Avatar do autor (imagem ou iniciais)
   const authorAvatar = comment.author?.avatar && comment.author.avatar.trim() !== ""
-    ? `<img src="http://localhost:5050${comment.author.avatar}" alt="${comment.author.username || 'Avatar'}" />`
+    ? `<img src="${typeof resolveUrl !== 'undefined' ? resolveUrl(comment.author.avatar) : (typeof API_URL !== 'undefined' ? API_URL + comment.author.avatar : 'http://localhost:5050' + comment.author.avatar)}" alt="${comment.author.username || 'Avatar'}" />`
     : authorInitials;
 
     const userId = currentUser?.id ?? null;
@@ -928,7 +929,8 @@ const hasDisliked =
   const attachmentsHtml = comment.attachments && comment.attachments.length > 0
     ? `<div class="comment-attachments">
         ${comment.attachments.map(att => {
-          const fileUrl = `http://localhost:5050${att.url}`;
+          // Usar resolveUrl para URLs do Cloudinary ou anexos locais
+          const fileUrl = typeof resolveUrl !== 'undefined' ? resolveUrl(att.url) : (att.url && (att.url.startsWith('http://') || att.url.startsWith('https://')) ? att.url : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${att.url}`);
           if (att.type === 'image') {
             return `<div class="comment-attachment-card">
               <img src="${fileUrl}" alt="${att.filename}" class="comment-attachment-preview" />
@@ -1068,13 +1070,14 @@ function renderReply(reply) {
   
   // Avatar do autor (imagem ou iniciais)
   const authorAvatar = reply.author?.avatar && reply.author.avatar.trim() !== ""
-    ? `<img src="http://localhost:5050${reply.author.avatar}" alt="${reply.author.username || 'Avatar'}" />`
+    ? `<img src="${typeof resolveUrl !== 'undefined' ? resolveUrl(reply.author.avatar) : (typeof API_URL !== 'undefined' ? API_URL + reply.author.avatar : 'http://localhost:5050' + reply.author.avatar)}" alt="${reply.author.username || 'Avatar'}" />`
     : authorInitials;
 
   const attachmentsHtml = reply.attachments && reply.attachments.length > 0
     ? `<div class="comment-attachments">
         ${reply.attachments.map(att => {
-          const fileUrl = `http://localhost:5050${att.url}`;
+          // Usar resolveUrl para URLs do Cloudinary ou anexos locais
+          const fileUrl = typeof resolveUrl !== 'undefined' ? resolveUrl(att.url) : (att.url && (att.url.startsWith('http://') || att.url.startsWith('https://')) ? att.url : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${att.url}`);
           if (att.type === 'image') {
             return `<div class="comment-attachment-card">
               <img src="${fileUrl}" alt="${att.filename}" class="comment-attachment-preview" />
@@ -1489,13 +1492,8 @@ window.downloadFile = async function(url, filename) {
     // Garantir que o URL está completo
     let fullUrl = url;
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      // Se o URL começa com /uploads, adicionar o domínio
-      if (url.startsWith('/uploads')) {
-        fullUrl = `http://localhost:5050${url}`;
-      } else {
-        // Se não começa com /, assumir que é relativo
-        fullUrl = `http://localhost:5050/${url}`;
-      }
+      // Usar resolveUrl se disponível, senão usar API_URL
+      fullUrl = typeof resolveUrl !== 'undefined' ? resolveUrl(url) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${url.startsWith('/') ? url : '/' + url}`;
     }
 
     // Tentar fazer fetch primeiro para verificar se o ficheiro existe
@@ -1542,7 +1540,7 @@ window.downloadFile = async function(url, filename) {
     console.error("Erro ao descarregar ficheiro:", error);
     // Fallback: tentar abrir em nova aba
     try {
-      const fullUrl = url.startsWith('http') ? url : `http://localhost:5050${url.startsWith('/') ? url : '/' + url}`;
+      const fullUrl = url.startsWith('http') ? url : (typeof resolveUrl !== 'undefined' ? resolveUrl(url) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${url.startsWith('/') ? url : '/' + url}`);
       window.open(fullUrl, '_blank');
     } catch (e) {
       alert('Erro ao descarregar ficheiro. O ficheiro pode não existir no servidor.');
@@ -2429,7 +2427,7 @@ function openEditExerciseModal(exercise) {
 
       if (att.type === "image") {
         const img = document.createElement("img");
-        img.src = `http://localhost:5050${att.url}`;
+        img.src = typeof resolveUrl !== 'undefined' ? resolveUrl(att.url) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${att.url}`;
         preview.appendChild(img);
       } else {
         preview.textContent = "PDF";
