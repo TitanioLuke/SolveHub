@@ -17,19 +17,23 @@ const {
 const authMiddleware = require("../middleware/authMiddleware");
 
 // ===============================
-// MULTER CONFIG
+// MULTER CONFIG (Memory Storage para Cloudinary)
 // ===============================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => {
-    const ext = file.originalname.split(".").pop();
-    cb(null, `${req.user.id}-${Date.now()}.${ext}`);
-  },
-});
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  // Aceitar apenas imagens
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Apenas imagens permitidas"), false);
+  }
+};
 
 const upload = multer({
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
 // ===============================

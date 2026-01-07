@@ -105,23 +105,64 @@ exports.updateMe = async (req, res) => {
 // ===============================
 // UPLOAD AVATAR
 // ===============================
+const { uploadBufferToCloudinary, deleteAttachment } = require("../utils/cloudinaryUpload");
+
 exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "Nenhuma imagem enviada" });
     }
 
-    const avatarPath = `/uploads/${req.file.filename}`;
+    // Buscar utilizador atual para apagar avatar antigo se existir
+    const currentUser = await User.findById(req.user.id);
+    
+    // Fazer upload para Cloudinary
+    console.log(`📤 Fazendo upload de avatar para Cloudinary: ${req.file.originalname}`);
+    const uploadResult = await uploadBufferToCloudinary(req.file.buffer, {
+      filename: `avatar-${req.user.id}`,
+      folder: `${process.env.CLOUDINARY_FOLDER || "solvehub"}/avatars`, // Pasta específica para avatares
+    });
 
+    console.log(`✓ Avatar carregado: ${uploadResult.url}`);
+
+    // Apagar avatar antigo do Cloudinary se existir
+    if (currentUser.avatar) {
+      // Verificar se o avatar antigo está no Cloudinary (URL começa com https://res.cloudinary.com)
+      if (currentUser.avatar.startsWith("https://res.cloudinary.com") || currentUser.avatar.includes("cloudinary.com")) {
+        // Extrair publicId da URL do Cloudinary
+        // Formato: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{folder}/{public_id}.{format}
+        try {
+          const url = currentUser.avatar;
+          // Encontrar "upload/" na URL e pegar tudo depois
+          const uploadIndex = url.indexOf("/upload/");
+          if (uploadIndex !== -1) {
+            const afterUpload = url.substring(uploadIndex + "/upload/".length);
+            // Remover parâmetros de query e fragmentos
+            const publicIdWithExt = afterUpload.split("?")[0].split("#")[0];
+            // Remover extensão
+            const publicId = publicIdWithExt.replace(/\.[^/.]+$/, "");
+            
+            await deleteAttachment({ publicId, url: currentUser.avatar });
+            console.log(`✓ Avatar antigo removido do Cloudinary (${publicId})`);
+          }
+        } catch (deleteError) {
+          console.error("Erro ao apagar avatar antigo do Cloudinary:", deleteError);
+          // Não falhar se não conseguir apagar o avatar antigo
+        }
+      }
+    }
+
+    // Atualizar utilizador com nova URL do Cloudinary
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { avatar: avatarPath },
+      { avatar: uploadResult.url }, // URL completo do Cloudinary
       { new: true }
     ).select("-password");
 
     res.json(user);
-  } catch {
-    res.status(500).json({ message: "Erro ao atualizar avatar" });
+  } catch (error) {
+    console.error("Erro ao atualizar avatar:", error);
+    res.status(500).json({ message: `Erro ao atualizar avatar: ${error.message || "Erro desconhecido"}` });
   }
 };
 

@@ -149,7 +149,8 @@ if (avatarBtn) {
         formData.append('avatar', fileInput.files[0]);
 
         try {
-            const res = await fetch("http://localhost:5050/auth/me/avatar", {
+            const apiUrl = typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050';
+            const res = await fetch(`${apiUrl}/auth/me/avatar`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`

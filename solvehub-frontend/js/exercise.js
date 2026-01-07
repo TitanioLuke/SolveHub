@@ -16,6 +16,60 @@ let replyFiles = new Map(); // Guardar ficheiros selecionados para cada resposta
 let exerciseSocket = null; // Socket.IO para comentários do exercício
 
 // ===============================
+//  LOAD SUBJECTS IN SIDEBAR (para página de exercício)
+// ===============================
+async function loadSubjectsInSidebar() {
+  const container = document.getElementById("subjectTagsContainer");
+  if (!container) return;
+
+  try {
+    // Carregar apenas disciplinas populares para o sidemenu
+    const popularSubjects = await apiGet("/subjects?popular=true");
+    console.log("Disciplinas populares carregadas para sidemenu:", popularSubjects);
+    
+    if (window.renderSubjectTags) {
+      window.renderSubjectTags(container, popularSubjects, (subjectId, subjectName) => {
+        console.log("Disciplina clicada:", subjectName, subjectId);
+        // Redirecionar para explorar com filtro de disciplina
+        window.location.href = `explore.html?subject=${encodeURIComponent(subjectName)}`;
+      });
+    } else {
+      // Fallback se renderSubjectTags não estiver disponível
+      if (popularSubjects && popularSubjects.length > 0) {
+        container.innerHTML = popularSubjects.map(subject => {
+          const subjectId = subject._id || subject.id;
+          const subjectName = escapeHtml(subject.name);
+          return `
+            <span class="tag" data-subject-id="${subjectId}" data-subject="${subjectName}" style="cursor: pointer;">
+              ${subjectName}
+            </span>
+          `;
+        }).join("");
+        
+        // Adicionar event listeners
+        container.querySelectorAll(".tag").forEach(tag => {
+          tag.addEventListener("click", (e) => {
+            e.preventDefault();
+            const subjectName = tag.dataset.subject;
+            if (subjectName) {
+              window.location.href = `explore.html?subject=${encodeURIComponent(subjectName)}`;
+            }
+          });
+        });
+      } else {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Nenhuma disciplina disponível</p>';
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao carregar disciplinas:", error);
+    const container = document.getElementById("subjectTagsContainer");
+    if (container) {
+      container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Erro ao carregar disciplinas</p>';
+    }
+  }
+}
+
+// ===============================
 //  LOAD LOGGED USER
 // ===============================
 async function loadLoggedUser() {
@@ -1496,54 +1550,150 @@ window.downloadFile = async function(url, filename) {
       fullUrl = typeof resolveUrl !== 'undefined' ? resolveUrl(url) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${url.startsWith('/') ? url : '/' + url}`;
     }
 
-    // Tentar fazer fetch primeiro para verificar se o ficheiro existe
-    let response;
-    try {
-      response = await fetch(fullUrl, { method: 'HEAD' });
-    } catch (fetchError) {
-      console.error("Erro ao verificar ficheiro:", fetchError);
-      // Tentar abrir em nova aba como fallback
-      window.open(fullUrl, '_blank');
-      return;
-    }
+    // Se for URL do Cloudinary, fazer download direto
+    const isCloudinaryUrl = fullUrl.includes('cloudinary.com');
     
-    if (!response.ok) {
-      // Se o ficheiro não existir (404), mostrar mensagem e tentar abrir em nova aba
-      if (response.status === 404) {
-        console.warn(`Ficheiro não encontrado no servidor: ${fullUrl}`);
-        alert(`O ficheiro "${filename || 'anexo'}" não foi encontrado no servidor. Pode ter sido removido.`);
+    if (isCloudinaryUrl) {
+      // Para Cloudinary, usar a URL original e fazer download via blob
+      // Não modificar a URL - o atributo 'download' no link já força o download
+      try {
+        console.log(`📥 Descarregando do Cloudinary: ${fullUrl}`);
+        
+        const blobResponse = await fetch(fullUrl, {
+          mode: 'cors',
+          cache: 'no-cache',
+        });
+        
+        if (!blobResponse.ok) {
+          throw new Error(`Erro HTTP ${blobResponse.status}: ${blobResponse.statusText}`);
+        }
+        
+        // Verificar se a resposta é realmente um blob
+        const contentType = blobResponse.headers.get('content-type');
+        console.log(`Content-Type: ${contentType}`);
+        
+        const blob = await blobResponse.blob();
+        
+        if (!blob || blob.size === 0) {
+          throw new Error('Blob vazio recebido');
+        }
+        
+        console.log(`Blob criado: ${blob.size} bytes, tipo: ${blob.type}`);
+        
+        // Criar blob URL e forçar download
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        const downloadLink = document.createElement('a');
+        downloadLink.href = blobUrl;
+        downloadLink.download = filename || 'download';
+        downloadLink.style.display = 'none';
+        downloadLink.setAttribute('download', filename || 'download'); // Forçar atributo download
+        
+        // Adicionar ao DOM antes de clicar
+        document.body.appendChild(downloadLink);
+        
+        // Trigger do download
+        downloadLink.click();
+        
+        // Dar tempo para o download iniciar antes de limpar
+        setTimeout(() => {
+          try {
+            if (document.body.contains(downloadLink)) {
+              document.body.removeChild(downloadLink);
+            }
+            window.URL.revokeObjectURL(blobUrl);
+          } catch (cleanupError) {
+            console.warn("Erro ao limpar recursos:", cleanupError);
+          }
+        }, 2000); // Aumentar tempo para garantir que o download iniciou
+        
+        console.log(`✓ Download iniciado: ${filename} (${blob.size} bytes)`);
+        return;
+      } catch (cloudinaryError) {
+        console.error("Erro ao descarregar do Cloudinary:", cloudinaryError);
+        console.error("Stack:", cloudinaryError.stack);
+        
+        // Se falhar, tentar usar uma abordagem alternativa: criar link com download forçado
+        // Usar a URL original do Cloudinary
+        console.log(`Tentando método alternativo para: ${fullUrl}`);
+        
+        // Criar um iframe temporário para forçar download
+        try {
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = fullUrl;
+          document.body.appendChild(iframe);
+          
+          // Também tentar criar link direto
+          const directLink = document.createElement('a');
+          directLink.href = fullUrl;
+          directLink.download = filename || 'download';
+          directLink.target = '_blank';
+          directLink.style.display = 'none';
+          document.body.appendChild(directLink);
+          directLink.click();
+          
+          setTimeout(() => {
+            if (document.body.contains(iframe)) document.body.removeChild(iframe);
+            if (document.body.contains(directLink)) document.body.removeChild(directLink);
+          }, 2000);
+          
+          console.log(`✓ Método alternativo aplicado`);
+          return;
+        } catch (altError) {
+          console.error("Método alternativo também falhou:", altError);
+          // Último recurso: abrir em nova aba
+          window.open(fullUrl, '_blank');
+          return;
+        }
       }
-      // Tentar abrir em nova aba como fallback
-      window.open(fullUrl, '_blank');
-      return;
     }
 
-    // Se o ficheiro existir, fazer download usando blob
-    const blobResponse = await fetch(fullUrl);
-    if (!blobResponse.ok) {
-      throw new Error(`Erro ao carregar ficheiro: ${blobResponse.status}`);
+    // Para URLs locais, tentar download direto primeiro (sem HEAD)
+    try {
+      console.log(`📥 Descarregando ficheiro local: ${fullUrl}`);
+      const blobResponse = await fetch(fullUrl);
+      
+      if (!blobResponse.ok) {
+        // Se não conseguir, tentar abrir em nova aba
+        if (blobResponse.status === 404) {
+          console.warn(`Ficheiro não encontrado: ${fullUrl}`);
+          alert(`O ficheiro "${filename || 'anexo'}" não foi encontrado.`);
+        }
+        window.open(fullUrl, '_blank');
+        return;
+      }
+      
+      const blob = await blobResponse.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      const downloadLink = document.createElement('a');
+      downloadLink.href = blobUrl;
+      downloadLink.download = filename || 'download';
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      
+      // Limpar após um tempo
+      setTimeout(() => {
+        document.body.removeChild(downloadLink);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 100);
+      
+      console.log(`✓ Download iniciado: ${filename}`);
+    } catch (localError) {
+      console.error("Erro ao descarregar ficheiro local:", localError);
+      // Fallback: abrir em nova aba
+      window.open(fullUrl, '_blank');
     }
-    
-    const blob = await blobResponse.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
-    
-    const downloadLink = document.createElement('a');
-    downloadLink.href = blobUrl;
-    downloadLink.download = filename || 'download';
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-    
-    // Limpar o blob URL
-    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
   } catch (error) {
     console.error("Erro ao descarregar ficheiro:", error);
-    // Fallback: tentar abrir em nova aba
+    // Fallback final: tentar abrir em nova aba
     try {
       const fullUrl = url.startsWith('http') ? url : (typeof resolveUrl !== 'undefined' ? resolveUrl(url) : `${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050'}${url.startsWith('/') ? url : '/' + url}`);
       window.open(fullUrl, '_blank');
     } catch (e) {
-      alert('Erro ao descarregar ficheiro. O ficheiro pode não existir no servidor.');
+      alert('Erro ao descarregar ficheiro. Tenta abrir o ficheiro diretamente.');
     }
   }
 };
@@ -2028,6 +2178,11 @@ function disconnectExerciseSocket() {
 async function initExercisePage() {
   console.log("Inicializando página de exercício...");
   console.log("Exercise ID:", exerciseId);
+  
+  // Carregar disciplinas populares no sidebar (não requer autenticação)
+  loadSubjectsInSidebar().catch(err => {
+    console.error("Erro ao carregar disciplinas populares:", err);
+  });
   
   // Carregar exercício PRIMEIRO (não requer autenticação)
   // Isso garante que o utilizador veja o conteúdo mesmo se houver problema com o token

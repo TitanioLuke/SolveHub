@@ -144,10 +144,8 @@ function renderSubjectTags(container, subjects, onSelect = null) {
     return;
   }
 
-  // Criar tags (máximo 5 para sidebar)
-  const subjectsToShow = subjects.slice(0, 5);
-  
-  subjectsToShow.forEach(subject => {
+  // Criar tags para todas as disciplinas populares (sem limite)
+  subjects.forEach(subject => {
     const tag = document.createElement("span");
     tag.className = "tag";
     tag.dataset.subjectId = subject._id || subject.id;
