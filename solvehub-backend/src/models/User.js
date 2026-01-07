@@ -33,8 +33,8 @@ const UserSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["admin", "aluno", "professor"],
-      default: "aluno",
+      enum: ["ALUNO", "ADMIN", "aluno", "admin"],
+      default: "ALUNO",
     },
 
     isActive: {
@@ -58,6 +58,21 @@ const UserSchema = new mongoose.Schema(
 
     lastLogin: {
       type: Date,
+    },
+
+    notificationSettings: {
+      exerciseReplies: {
+        type: Boolean,
+        default: true,
+      },
+      commentReplies: {
+        type: Boolean,
+        default: true,
+      },
+      exerciseLikes: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
   {

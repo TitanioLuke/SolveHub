@@ -1,0 +1,82 @@
+/* ===============================
+   MY EXERCISES PAGE
+   =============================== */
+
+.my-exercise-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.my-exercise-card .exercise-info {
+  flex: 1;
+  cursor: pointer;
+  min-width: 0; /* Permite que o texto seja truncado */
+}
+
+.my-exercise-card .exercise-meta {
+  flex-shrink: 0;
+}
+
+/* ===============================
+   ACTION BUTTONS
+   =============================== */
+
+.my-exercise-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  flex-shrink: 0;
+  border-left: 1px solid #e5e7eb;
+  margin-left: 1rem;
+}
+
+.my-exercise-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.my-exercise-action-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.my-exercise-action-btn.delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.my-exercise-action-btn svg {
+  pointer-events: none;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .my-exercise-card {
+    flex-direction: column;
+  }
+
+  .my-exercise-actions {
+    flex-direction: row;
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+    margin-left: 0;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    justify-content: center;
+  }
+}
+

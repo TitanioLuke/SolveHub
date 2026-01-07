@@ -7,19 +7,106 @@
 }
 
 body {
-    background: #f1f5fb;
-    color: #111827;
+    background: var(--bg);
+    color: var(--text);
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Variáveis globais */
-:root {
-    --primary: #2563eb;
-    --primary-soft: #e0edff;
+/* Variáveis globais - Tema Claro */
+:root,
+:root[data-theme="light"] {
+    --bg: #f1f5fb;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+    --border: #e5e7eb;
     --text: #111827;
     --text-muted: #6b7280;
-    --bg: #f1f5fb;
-    --bg-white: white;
-    --border: #e5e7eb;
+    --primary: #2563eb;
+    --primary-2: #1d4ed8;
+    --primary-soft: #e0edff;
     --radius: 14px;
     --shadow: 0px 8px 25px rgba(15, 23, 42, 0.08);
+    
+    /* Aliases para compatibilidade */
+    --bg-white: var(--surface);
+}
+
+/* Variáveis globais - Tema Escuro (tons de azul) */
+:root[data-theme="dark"] {
+    --bg: #07152a;
+    --surface: #0b1f3a;
+    --surface-2: #0f2a4a;
+    --border: rgba(148, 163, 184, 0.18);
+    --text: #e6f0ff;
+    --text-muted: rgba(230, 240, 255, 0.72);
+    --primary: #3b82f6;
+    --primary-2: #60a5fa;
+    --primary-soft: rgba(96, 165, 250, 0.15);
+    --shadow: 0px 10px 30px rgba(0, 0, 0, 0.45);
+    
+    /* Aliases para compatibilidade */
+    --bg-white: var(--surface);
+}
+
+[data-theme="dark"] body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Ajustes específicos para tema escuro */
+[data-theme="dark"] .menu-item {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .menu-item:hover {
+    background: rgba(96, 165, 250, 0.1);
+}
+
+[data-theme="dark"] .menu-item.active {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .dropdown-item {
+    border-bottom-color: #334155;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background: rgba(96, 165, 250, 0.1);
+}
+
+[data-theme="dark"] .profile:hover {
+    background: rgba(96, 165, 250, 0.1);
+}
+
+/* Ajustes adicionais para tema escuro */
+[data-theme="dark"] .sidebar-info-row {
+    border-bottom-color: #334155;
+}
+
+[data-theme="dark"] .comment-textarea {
+    background: var(--bg-white);
+    color: var(--text);
+}
+
+[data-theme="dark"] .comment-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .reply-form textarea {
+    background: var(--bg-white);
+    color: var(--text);
+}
+
+[data-theme="dark"] .reply-form textarea::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .comments-sort-select {
+    background: var(--bg-white);
+    color: var(--text);
+}
+
+[data-theme="dark"] .comments-sort-select:focus {
+    background: var(--bg-white);
 }

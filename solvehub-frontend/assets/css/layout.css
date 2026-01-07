@@ -8,21 +8,21 @@
 
 /* Sidebar — igual ao original + borda arredondada */
 .sidebar {
-    background: var(--bg-white);
+    background: var(--surface);
     border-right: 1px solid var(--border);
     padding: 26px;
     display: flex;
     flex-direction: column;
     gap: 30px;
-
     border-top-right-radius: 38px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 /* Content — igual ao original + borda curva */
 .content {
     padding: 30px 40px;
-    background: #f7f9fc;
+    background: var(--bg);
     overflow-y: auto;
-
     border-top-left-radius: 38px;
+    transition: background-color 0.2s ease;
 }

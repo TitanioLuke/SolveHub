@@ -9,6 +9,8 @@ const {
     deleteExercise,
     toggleLike,
     toggleDislike,
+    saveExercise,
+    unsaveExercise,
 } = require("../controllers/exerciseController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -31,5 +33,9 @@ router.delete("/:id", authMiddleware, deleteExercise);
 // Like/Dislike (protegido)
 router.post("/:id/like", authMiddleware, toggleLike);
 router.post("/:id/dislike", authMiddleware, toggleDislike);
+
+// Save/Unsave (protegido)
+router.post("/:id/save", authMiddleware, saveExercise);
+router.delete("/:id/save", authMiddleware, unsaveExercise);
 
 module.exports = router;

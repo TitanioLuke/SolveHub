@@ -7,10 +7,26 @@ const messageEl = document.getElementById('form-message');
 
 // novos elementos
 const subjectHiddenInput = document.getElementById('subject');
-const subjectPills = document.querySelectorAll('.subject-pill');
+const subjectPillsContainer = document.getElementById('subjectPills');
+const subjectIdHiddenInput = document.getElementById('subjectId') || (() => {
+  // Criar input hidden para subjectId se não existir
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.id = 'subjectId';
+  input.name = 'subjectId';
+  const form = document.getElementById('create-exercise-form');
+  if (form) {
+    const subjectGroup = form.querySelector('.form-group');
+    if (subjectGroup) {
+      subjectGroup.appendChild(input);
+    }
+  }
+  return input;
+})();
 const tagInput = document.getElementById('tagInput');
 const tagsListEl = document.getElementById('tagsList');
 let currentTags = [];
+let allSubjects = [];
 
 // ficheiros (para mais tarde ligar ao upload real)
 const attachmentsInput = document.getElementById('attachments');
@@ -19,16 +35,56 @@ const uploadTriggerBtn = document.getElementById('uploadTrigger');
 let currentFiles = [];
 
 // -------- MODAL --------
-function openModal() {
+async function openModal() {
+  // Mostrar modal primeiro para não bloquear a UI
+  overlay.classList.remove('hidden');
+  
   form.reset();
-  messageEl.textContent = '';
-  messageEl.className = 'form-message';
+  if (messageEl) {
+    messageEl.textContent = '';
+    messageEl.className = 'form-message';
+  }
 
-  // reset pills
-  subjectPills.forEach((pill, index) => {
-    pill.classList.toggle('active', index === 0);
-  });
-  subjectHiddenInput.value = subjectPills[0].dataset.subject;
+  // Carregar subjects
+  try {
+    // Usar window.fetchSubjects se disponível, senão usar fetchSubjects local
+    const fetchFn = window.fetchSubjects || (typeof fetchSubjects === 'function' ? fetchSubjects : null);
+    if (!fetchFn) {
+      throw new Error('fetchSubjects não está disponível. Certifica-te que subjects.js é carregado antes.');
+    }
+    allSubjects = await fetchFn();
+    
+    if (subjectPillsContainer && window.renderSubjectPills) {
+      const renderFn = window.renderSubjectPills;
+      renderFn(subjectPillsContainer, allSubjects, null, null, (subjectId, subjectName) => {
+        if (subjectIdHiddenInput) subjectIdHiddenInput.value = subjectId;
+        if (subjectHiddenInput) subjectHiddenInput.value = subjectName; // Manter compatibilidade
+      });
+      
+      // Selecionar primeiro por padrão
+      if (allSubjects.length > 0) {
+        const firstPill = subjectPillsContainer.querySelector('.subject-pill');
+        if (firstPill) {
+          if (subjectIdHiddenInput) subjectIdHiddenInput.value = firstPill.dataset.subjectId;
+          if (subjectHiddenInput) subjectHiddenInput.value = firstPill.dataset.subject;
+        }
+      }
+    } else {
+      console.warn('renderSubjectPills não está disponível ou subjectPillsContainer não encontrado');
+      if (subjectPillsContainer) {
+        subjectPillsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">A carregar disciplinas...</p>';
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar disciplinas:', error);
+    if (subjectPillsContainer) {
+      subjectPillsContainer.innerHTML = '<p style="color: var(--text-error, #ef4444); font-size: 13px;">Erro ao carregar disciplinas. Recarrega a página.</p>';
+    }
+    if (messageEl) {
+      messageEl.textContent = 'Erro ao carregar disciplinas. Tenta novamente.';
+      messageEl.className = 'form-message error';
+    }
+  }
 
   // reset tags
   currentTags = [];
@@ -37,8 +93,6 @@ function openModal() {
   // reset ficheiros
   currentFiles = [];
   refreshFilesView();
-
-  overlay.classList.remove('hidden');
 }
 
 function closeModal() {
@@ -54,13 +108,16 @@ overlay.addEventListener('click', (e) => {
 });
 
 // -------- DISCIPLINA --------
-subjectPills.forEach((pill) => {
-  pill.addEventListener('click', () => {
-    subjectPills.forEach((p) => p.classList.remove('active'));
-    pill.classList.add('active');
-    subjectHiddenInput.value = pill.dataset.subject;
+// Event delegation para pills dinâmicas
+if (subjectPillsContainer) {
+  subjectPillsContainer.addEventListener('click', (e) => {
+    const pill = e.target.closest('.subject-pill');
+    if (pill) {
+      subjectIdHiddenInput.value = pill.dataset.subjectId;
+      subjectHiddenInput.value = pill.dataset.subject;
+    }
   });
-});
+}
 
 // -------- TAGS --------
 function renderTags() {
@@ -100,7 +157,15 @@ form.addEventListener('submit', async (e) => {
   // FormData para ficheiros + campos
   const formData = new FormData();
   formData.append('title', form.title.value.trim());
-  formData.append('subject', subjectHiddenInput.value);
+  
+  // Enviar subjectId se disponível, senão subject (string) para compatibilidade
+  if (subjectIdHiddenInput.value) {
+    formData.append('subjectId', subjectIdHiddenInput.value);
+  }
+  if (subjectHiddenInput.value) {
+    formData.append('subject', subjectHiddenInput.value);
+  }
+  
   formData.append('description', form.description.value.trim());
   formData.append('tags', JSON.stringify(currentTags));
 

@@ -13,10 +13,15 @@ const ExerciseSchema = new mongoose.Schema(
       required: [true, "A descrição é obrigatória"],
     },
 
+    // Manter subject (string) para compatibilidade durante migração
     subject: {
       type: String,
-      required: [true, "A disciplina/assunto é obrigatória"],
       trim: true,
+    },
+    // Nova referência ao Subject
+    subjectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subject",
     },
 
     tags: [

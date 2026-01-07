@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - SolveHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS modular -->
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/layout.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+    <link rel="stylesheet" href="./assets/css/modal.css">
+    <link rel="stylesheet" href="./assets/css/admin.css">
+
+    <!-- Theme System -->
+    <script src="./js/theme.js" defer></script>
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            Solve<span>Hub</span>
+        </div>
+
+        <nav class="menu">
+            <p class="menu-title">Menu Principal</p>
+            <a class="menu-item" href="index.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Início
+            </a>
+            <a class="menu-item" href="explore.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Explorar
+            </a>
+            <a class="menu-item" href="my-exercises.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Meus exercícios
+            </a>
+            <a class="menu-item" href="saved.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                </svg>
+                Guardados
+            </a>
+            <a class="menu-item" href="settings.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Definições
+            </a>
+            <a class="menu-item active" href="admin.html" id="adminMenuItem" style="display: none;">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Admin
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div></div>
+            <div class="profile" id="profileSection">
+                <span class="profile-name">Carregando...</span>
+                <div class="avatar">A</div>
+            </div>
+        </header>
+
+        <!-- DROPDOWN DO PERFIL -->
+        <div class="dropdown hidden" id="profileMenu">
+            <a href="settings.html" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Perfil
+            </a>
+            <a href="settings.html" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Definições
+            </a>
+            <a href="#" class="dropdown-item logout">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Terminar sessão
+            </a>
+        </div>
+
+        <!-- ADMIN CONTENT -->
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1>Painel de Administração</h1>
+                <p>Gerir disciplinas, reports e utilizadores</p>
+            </div>
+
+            <!-- TABS -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="subjects">Disciplinas</button>
+                <button class="admin-tab" data-tab="reports">Reports</button>
+                <button class="admin-tab" data-tab="roles">Roles</button>
+            </div>
+
+            <!-- TAB CONTENT -->
+            <div class="admin-content">
+                <!-- SUBJECTS TAB -->
+                <div class="admin-tab-content active" id="tab-subjects">
+                    <div class="admin-section-header">
+                        <h2>Disciplinas</h2>
+                        <button class="btn-primary" id="createSubjectBtn">Criar disciplina</button>
+                    </div>
+                    <div id="subjectsList" class="admin-list">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>A carregar disciplinas...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REPORTS TAB -->
+                <div class="admin-tab-content" id="tab-reports">
+                    <div class="admin-section-header">
+                        <h2>Reports</h2>
+                        <div class="admin-filters">
+                            <select id="reportTypeFilter" class="admin-filter-select">
+                                <option value="">Todos os tipos</option>
+                                <option value="EXERCISE">Exercícios</option>
+                                <option value="ANSWER">Comentários</option>
+                            </select>
+                            <select id="reportStatusFilter" class="admin-filter-select">
+                                <option value="">Todos os estados</option>
+                                <option value="PENDENTE">Pendente</option>
+                                <option value="RESOLVIDO">Resolvido</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="reportsList" class="admin-list">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>A carregar reports...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROLES TAB -->
+                <div class="admin-tab-content" id="tab-roles">
+                    <div class="admin-section-header">
+                        <h2>Gestão de Roles</h2>
+                        <div class="admin-search admin-search-wrapper">
+                            <input type="text" id="userSearchInput" class="admin-search-input" placeholder="Pesquisar por nome ou email...">
+                            <button type="button" id="clearSearchBtn" class="admin-clear-search" style="display: none;" title="Limpar pesquisa">
+                                Limpar
+                            </button>
+                        </div>
+                    </div>
+                    <div id="rolesList" class="admin-list">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>A carregar utilizadores...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL DE CONFIRMAÇÃO -->
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-card modal-card-confirm">
+        <div class="modal-confirm-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+        </div>
+        <h3 class="modal-title" id="confirmModalTitle">Confirmar ação?</h3>
+        <p class="modal-message" id="confirmModalMessage">Tens a certeza que queres realizar esta ação?</p>
+        <div class="modal-actions">
+            <button type="button" class="btn-outline" id="confirmModalCancel">Cancelar</button>
+            <button type="button" class="btn-primary" id="confirmModalConfirm">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE CRIAÇÃO/EDIÇÃO -->
+<div id="editModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 class="modal-title" id="editModalTitle">Criar</h3>
+            <button class="modal-close" id="editModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editForm">
+                <div class="form-group">
+                    <label for="editNameInput">Nome</label>
+                    <input type="text" id="editNameInput" required maxlength="100" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="editIsPopularInput">
+                        <span>Disciplina Popular (aparece no sidemenu)</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" id="editModalCancel">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="editModalSubmit">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE REPORT -->
+<div id="reportModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 class="modal-title">Reportar</h3>
+            <button class="modal-close" id="reportModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="reportForm">
+                <div class="form-group">
+                    <label for="reportReasonSelect">Motivo</label>
+                    <select id="reportReasonSelect" required>
+                        <option value="">Selecionar motivo...</option>
+                        <option value="SPAM">Spam</option>
+                        <option value="OFFENSIVE">Conteúdo ofensivo</option>
+                        <option value="FALSE_INFO">Informação falsa</option>
+                        <option value="OTHER">Outro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportDetailsTextarea">Detalhes (opcional)</label>
+                    <textarea id="reportDetailsTextarea" rows="4" maxlength="300" placeholder="Descreve o problema..."></textarea>
+                    <small class="char-count"><span id="reportCharCount">0</span>/300</small>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" id="reportModalCancel">Cancelar</button>
+                    <button type="submit" class="btn-primary">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ALTERAR ROLE -->
+<div id="roleModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 class="modal-title">Alterar Role</h3>
+            <button class="modal-close" id="roleModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="roleForm">
+                <div class="form-group">
+                    <label for="roleSelect">Role</label>
+                    <select id="roleSelect" required>
+                        <option value="ALUNO">ALUNO</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" id="roleModalCancel">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="./js/api.js"></script>
+<script src="./js/script.js"></script>
+<script src="./js/admin.js"></script>
+
+</body>
+</html>
+

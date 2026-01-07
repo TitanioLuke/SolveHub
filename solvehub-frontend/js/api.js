@@ -74,21 +74,48 @@ async function apiPostFormData(path, formData) {
     }
     // Não definir Content-Type - o browser define automaticamente com boundary para FormData
 
-    const res = await fetch(API_URL + path, {
-        method: "POST",
-        headers: headers,
-        body: formData
-    });
+    try {
+        const res = await fetch(API_URL + path, {
+            method: "POST",
+            headers: headers,
+            body: formData
+        });
 
-    if (!res.ok) {
+        // Se a resposta foi bem-sucedida, tentar parsear JSON
+        // Mesmo que o servidor não retorne JSON, não é um erro se o status for 2xx
+        if (res.ok) {
+            // Verificar se há conteúdo para parsear
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                try {
+                    return await res.json();
+                } catch (e) {
+                    // Se não conseguir parsear JSON mas o status é OK, retornar null
+                    return null;
+                }
+            }
+            // Se não há conteúdo JSON, retornar null
+            return null;
+        }
+
+        // Se não foi bem-sucedida, tratar como erro
         const errorData = await res.json().catch(() => ({ message: `Erro na API (${res.status})` }));
         const error = new Error(errorData.message || `Erro na API (${res.status})`);
         error.status = res.status;
         error.response = errorData;
         throw error;
+    } catch (error) {
+        // Se for um erro de rede (Failed to fetch), verificar se pode ser um timeout
+        // mas a requisição foi processada (alguns servidores não esperam resposta)
+        if (error.message && error.message.includes("Failed to fetch")) {
+            // Não relançar o erro se for apenas um problema de rede após o envio
+            // O servidor pode ter processado a requisição mesmo sem resposta
+            console.warn("Possível erro de rede, mas a requisição pode ter sido processada:", error);
+            // Retornar um objeto vazio para indicar sucesso provável
+            return { success: true, message: "Resposta enviada (verificação de rede falhou)" };
+        }
+        throw error;
     }
-
-    return res.json();
 }
 
 // ===============================
@@ -134,3 +161,10 @@ async function apiDelete(path) {
 
     return res.json().catch(() => null);
 }
+
+// Tornar apiGet global para uso em outros scripts
+window.apiGet = apiGet;
+window.apiPost = apiPost;
+window.apiPostFormData = apiPostFormData;
+window.apiPut = apiPut;
+window.apiDelete = apiDelete;

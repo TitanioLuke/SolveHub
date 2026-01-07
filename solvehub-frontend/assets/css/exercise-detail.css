@@ -25,13 +25,14 @@
 
 /* EXERCISE CARD - MAIN CONTENT */
 .exercise-detail-card {
-    background: white;
+    background: var(--surface);
     padding: 40px;
     border-radius: 16px;
     border: 1px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow);
     flex: 1;
     min-width: 0;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 /* TITLE - LARGE */
@@ -67,7 +68,7 @@
     justify-content: center;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background: white;
+    background: var(--surface);
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -75,7 +76,7 @@
 }
 
 .exercise-action-btn:hover {
-    background: #f8fafc;
+    background: var(--primary-soft);
     border-color: var(--primary);
     color: var(--primary);
     transform: translateY(-1px);
@@ -96,6 +97,16 @@
     pointer-events: none;
 }
 
+.exercise-action-btn.report-btn {
+    color: var(--text-muted);
+}
+
+.exercise-action-btn.report-btn:hover {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
 /* ATTACHMENTS GRID */
 .exercise-attachments-grid {
     display: grid;
@@ -105,7 +116,7 @@
 }
 
 .attachment-card {
-    background: #f8fafc;
+    background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
@@ -123,7 +134,7 @@
     height: 200px;
     object-fit: cover;
     display: block;
-    background: #f1f5f9;
+    background: var(--surface-2);
 }
 
 .attachment-pdf-preview {
@@ -169,7 +180,7 @@
 }
 
 .download-btn:hover {
-    background: #f8fafc;
+    background: var(--surface-2);
     border-color: var(--primary);
     color: var(--primary);
 }
@@ -195,13 +206,66 @@
 }
 
 /* VOTING SECTION - YOUTUBE STYLE (SIDEBAR) */
+/* SAVE BUTTON */
+.sidebar-save-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-save-btn:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-save-btn:active {
+  transform: translateY(0);
+}
+
+.sidebar-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sidebar-save-btn.saved {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.sidebar-save-btn.saved:hover {
+  background: #dbeafe;
+  border-color: #1d4ed8;
+}
+
+.sidebar-save-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .sidebar-voting-section {
     display: flex;
     align-items: center;
     gap: 8px;
     justify-content: center;
     padding: 12px;
-    background: #f8fafc;
+    background: var(--surface-2);
     border-radius: 12px;
     border: 1px solid var(--border);
     position: relative;
@@ -215,7 +279,7 @@
     align-items: center;
     gap: 6px;
     padding: 8px 12px;
-    background: white;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 20px;
     cursor: pointer;
@@ -242,13 +306,13 @@
 
 .youtube-like-btn:hover,
 .youtube-dislike-btn:hover {
-    background: #f1f5f9;
+    background: var(--surface-2);
     border-color: var(--primary);
 }
 
 .youtube-like-btn.active {
     color: var(--primary);
-    background: #dbeafe;
+    background: var(--primary-soft);
     border-color: var(--primary);
 }
 
@@ -292,7 +356,7 @@
 }
 
 .sidebar-card {
-    background: white;
+    background: var(--surface);
     padding: 28px;
     border-radius: 16px;
     border: 1px solid var(--border);
@@ -319,7 +383,7 @@
     gap: 12px;
     margin-bottom: 20px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border);
 }
 
 .sidebar-info-row:last-child {
@@ -395,7 +459,7 @@
     flex: 1;
     text-align: center;
     padding: 16px;
-    background: #f8fafc;
+    background: var(--surface-2);
     border-radius: 12px;
     border: 1px solid var(--border);
 }
@@ -421,7 +485,7 @@
    ================================ */
 
 .comments-section {
-    background: white;
+    background: var(--surface);
     padding: 32px;
     border-radius: 16px;
     border: 1px solid var(--border);
@@ -454,7 +518,7 @@
     justify-content: flex-end;
     margin: 20px 0;
     padding: 16px;
-    background: #f8fafc;
+    background: var(--surface-2);
     border-radius: 10px;
     border: 1px solid var(--border);
 }
@@ -478,7 +542,7 @@
     padding: 8px 14px;
     border: 2px solid var(--primary);
     border-radius: 8px;
-    background: white;
+    background: var(--surface);
     color: var(--text);
     font-size: 14px;
     font-weight: 500;
@@ -488,8 +552,8 @@
 }
 
 .comments-sort-select:hover {
-    background: #f0f9ff;
-    border-color: #1d4ed8;
+    background: var(--surface-2);
+    border-color: var(--primary-2);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
@@ -498,14 +562,14 @@
     outline: none;
     border-color: #1d4ed8;
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-    background: white;
+    background: var(--surface);
 }
 
 /* COMMENT FORM */
 .comment-form-card {
     margin-bottom: 32px;
     padding: 20px;
-    background: #f8fafc;
+    background: var(--surface-2);
     border-radius: 12px;
     border: 1px solid var(--border);
 }
@@ -540,7 +604,6 @@
     border-radius: 999px !important;
     max-width: 40px !important;
     max-height: 40px !important;
-}
     flex-shrink: 0;
 }
 
@@ -571,13 +634,20 @@
     resize: vertical;
     min-height: 100px;
     margin-bottom: 12px;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.comment-textarea::placeholder {
+    color: var(--text-muted);
 }
 
 .comment-textarea:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    background: var(--surface);
 }
 
 /* UPLOAD AREA */
@@ -633,7 +703,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: white;
+    background: var(--surface);
     border: 1px dashed var(--border);
     border-radius: 8px;
     color: var(--text-muted);
@@ -674,7 +744,7 @@
     display: flex;
     gap: 16px;
     padding: 20px;
-    background: #f8fafc;
+    background: var(--surface-2);
     border-radius: 12px;
     border: 1px solid var(--border);
     transition: all 0.2s ease;
@@ -682,8 +752,8 @@
 }
 
 .comment-item:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
+    background: var(--surface);
+    border-color: var(--border);
 }
 
 /* VOTING BUTTONS (YOUTUBE STYLE FOR COMMENTS - VERTICAL) */
@@ -699,7 +769,7 @@
     align-items: center;
     gap: 4px;
     padding: 8px;
-    background: #f8fafc;
+    background: var(--surface);
     border-radius: 12px;
     border: 1px solid var(--border);
 }
@@ -767,7 +837,6 @@
     height: 100%;
     object-fit: cover;
     display: block;
-}
     flex-shrink: 0;
 }
 
@@ -803,7 +872,7 @@
 }
 
 .comment-attachment-card {
-    background: white;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
@@ -824,7 +893,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8fafc;
+    background: var(--surface-2);
     color: var(--text-muted);
 }
 
@@ -854,7 +923,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: white;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text-muted);
@@ -864,8 +933,8 @@
 }
 
 .comment-action-btn:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
 .comment-action-btn svg {
@@ -885,7 +954,7 @@
     display: flex;
     gap: 16px;
     padding: 16px;
-    background: white;
+    background: var(--surface);
     border-radius: 10px;
     border: 1px solid var(--border);
     margin-bottom: 12px;
@@ -900,7 +969,7 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    background: white;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text-muted);
@@ -912,7 +981,7 @@
 }
 
 .replies-toggle:hover {
-    background: #f1f5f9;
+    background: var(--surface-2);
     border-color: var(--primary);
     color: var(--primary);
 }
@@ -931,7 +1000,7 @@
     margin-top: 12px;
     margin-left: 52px;
     padding: 16px;
-    background: #f8fafc;
+    background: var(--surface-2);
     border-radius: 10px;
     border: 1px solid var(--border);
 }
@@ -946,6 +1015,19 @@
     resize: vertical;
     min-height: 80px;
     margin-bottom: 12px;
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.2s ease;
+}
+
+.reply-form textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.reply-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
 .reply-form-actions {

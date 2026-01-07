@@ -406,29 +406,158 @@ if (accountSection) {
 }
 
 // ===============================
-//   THEME SELECTION
+//   THEME SELECTION (usando sistema global)
 // ===============================
-const themeOptions = document.querySelectorAll('.theme-option');
-themeOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        themeOptions.forEach(opt => opt.classList.remove('active'));
-        option.classList.add('active');
-        localStorage.setItem('theme', option.querySelector('input').value);
+function loadTheme() {
+    // Usar sistema global se disponível, senão fallback
+    const getTheme = window.getTheme || (() => localStorage.getItem('theme') || 'light');
+    const savedTheme = getTheme();
+    
+    // Atualizar UI dos radio buttons
+    const themeOptions = document.querySelectorAll('.theme-option');
+    themeOptions.forEach(option => {
+        const input = option.querySelector('input[type="radio"]');
+        if (input && input.value === savedTheme) {
+            option.classList.add('active');
+            input.checked = true;
+        } else {
+            option.classList.remove('active');
+            input.checked = false;
+        }
     });
-});
+}
+
+function setupThemeSelection() {
+    const themeOptions = document.querySelectorAll('.theme-option');
+    themeOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const input = option.querySelector('input[type="radio"]');
+            if (!input) return;
+            
+            const theme = input.value;
+            
+            // Usar sistema global se disponível
+            if (window.setTheme) {
+                window.setTheme(theme);
+            } else {
+                // Fallback
+                localStorage.setItem('theme', theme);
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            
+            // Atualizar UI
+            themeOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+        });
+    });
+}
 
 // ===============================
-//   NOTIFICATION TOGGLES
+//   NOTIFICATION SETTINGS
 // ===============================
-const toggles = document.querySelectorAll('.toggle input[type="checkbox"]');
-toggles.forEach(toggle => {
-    toggle.addEventListener('change', () => {
-        const settings = JSON.parse(localStorage.getItem('settings') || '{}');
-        const key = toggle.closest('.setting-item').querySelector('h4').textContent;
-        settings[key] = toggle.checked;
-        localStorage.setItem('settings', JSON.stringify(settings));
+let notificationSettings = {
+  exerciseReplies: true,
+  commentReplies: true,
+  exerciseLikes: false
+};
+
+// ===============================
+//   LOAD NOTIFICATION SETTINGS
+// ===============================
+async function loadNotificationSettings() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const settings = await apiGet('/auth/me/notification-settings');
+    notificationSettings = {
+      exerciseReplies: settings.exerciseReplies !== undefined ? settings.exerciseReplies : true,
+      commentReplies: settings.commentReplies !== undefined ? settings.commentReplies : true,
+      exerciseLikes: settings.exerciseLikes !== undefined ? settings.exerciseLikes : false
+    };
+
+    // Atualizar toggles
+    const toggleExerciseReplies = document.getElementById('toggleExerciseReplies');
+    const toggleCommentReplies = document.getElementById('toggleCommentReplies');
+    const toggleExerciseLikes = document.getElementById('toggleExerciseLikes');
+
+    if (toggleExerciseReplies) toggleExerciseReplies.checked = notificationSettings.exerciseReplies;
+    if (toggleCommentReplies) toggleCommentReplies.checked = notificationSettings.commentReplies;
+    if (toggleExerciseLikes) toggleExerciseLikes.checked = notificationSettings.exerciseLikes;
+  } catch (error) {
+    console.warn('Erro ao carregar preferências de notificações, usando defaults:', error);
+    // Usar defaults do UI
+    notificationSettings = {
+      exerciseReplies: true,
+      commentReplies: true,
+      exerciseLikes: false
+    };
+  }
+}
+
+// ===============================
+//   UPDATE NOTIFICATION SETTING
+// ===============================
+async function updateNotificationSetting(settingKey, value) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Precisas de estar autenticado para alterar preferências.');
+    return;
+  }
+
+  // Atualizar estado local
+  notificationSettings[settingKey] = value;
+
+  try {
+    await apiPut('/auth/me/notification-settings', notificationSettings);
+  } catch (error) {
+    console.error('Erro ao guardar preferências:', error);
+    alert(error?.message || 'Erro ao guardar preferências. Tenta novamente.');
+    
+    // Reverter toggle
+    const toggle = document.querySelector(`[data-setting="${settingKey}"]`);
+    if (toggle) {
+      toggle.checked = !value;
+      notificationSettings[settingKey] = !value;
+    }
+  }
+}
+
+// ===============================
+//   SETUP NOTIFICATION TOGGLES
+// ===============================
+function setupNotificationToggles() {
+  const toggleExerciseReplies = document.getElementById('toggleExerciseReplies');
+  const toggleCommentReplies = document.getElementById('toggleCommentReplies');
+  const toggleExerciseLikes = document.getElementById('toggleExerciseLikes');
+
+  if (toggleExerciseReplies) {
+    toggleExerciseReplies.addEventListener('change', async (e) => {
+      const toggle = e.target;
+      toggle.disabled = true;
+      await updateNotificationSetting('exerciseReplies', toggle.checked);
+      toggle.disabled = false;
     });
-});
+  }
+
+  if (toggleCommentReplies) {
+    toggleCommentReplies.addEventListener('change', async (e) => {
+      const toggle = e.target;
+      toggle.disabled = true;
+      await updateNotificationSetting('commentReplies', toggle.checked);
+      toggle.disabled = false;
+    });
+  }
+
+  if (toggleExerciseLikes) {
+    toggleExerciseLikes.addEventListener('change', async (e) => {
+      const toggle = e.target;
+      toggle.disabled = true;
+      await updateNotificationSetting('exerciseLikes', toggle.checked);
+      toggle.disabled = false;
+    });
+  }
+}
 
 // ===============================
 //   LOAD USER DATA
@@ -482,6 +611,11 @@ async function loadUserFromAPI() {
         const user = await res.json();
         localStorage.setItem('user', JSON.stringify(user));
         loadUserData();
+
+        // Mostrar link Admin se autorizado
+        if (window.showAdminLinkIfAuthorized) {
+            window.showAdminLinkIfAuthorized();
+        }
     } catch (error) {
         console.error('Erro ao carregar utilizador:', error);
         // Tentar usar dados do localStorage se houver
@@ -492,4 +626,12 @@ async function loadUserFromAPI() {
 // ===============================
 //   INITIALIZE
 // ===============================
-loadUserFromAPI();
+async function initializeSettings() {
+  loadTheme(); // Carregar tema primeiro
+  await loadUserFromAPI();
+  await loadNotificationSettings();
+  setupNotificationToggles();
+  setupThemeSelection();
+}
+
+initializeSettings();

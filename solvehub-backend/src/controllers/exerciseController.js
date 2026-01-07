@@ -1,5 +1,8 @@
 const Exercise = require("../models/Exercise");
 const Answer = require("../models/Answer");
+const User = require("../models/User");
+const Subject = require("../models/Subject");
+const { createNotification } = require("../utils/notificationHelper");
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -52,7 +55,32 @@ exports.createExercise = [
   upload.array('attachments', 10), // máx 10 ficheiros
   async (req, res) => {
     try {
-      const { title, description, subject, tags } = req.body;
+      const { title, description, subject, subjectId, tags } = req.body;
+      
+      // Validar subjectId se fornecido
+      let finalSubjectId = null;
+      let finalSubject = null;
+      
+      if (subjectId) {
+        const subjectDoc = await Subject.findById(subjectId);
+        if (!subjectDoc) {
+          return res.status(400).json({ message: "Disciplina não encontrada." });
+        }
+        finalSubjectId = subjectId;
+        finalSubject = subjectDoc.name; // Manter compatibilidade
+      } else if (subject) {
+        // Se subjectId não fornecido mas subject (string) sim, tentar encontrar
+        const subjectDoc = await Subject.findOne({ name: subject });
+        if (subjectDoc) {
+          finalSubjectId = subjectDoc._id;
+          finalSubject = subjectDoc.name;
+        } else {
+          // Se não encontrar, usar string (compatibilidade durante migração)
+          finalSubject = subject;
+        }
+      } else {
+        return res.status(400).json({ message: "Disciplina é obrigatória." });
+      }
       
       // Processar ficheiros carregados
       const attachments = [];
@@ -60,7 +88,7 @@ exports.createExercise = [
         req.files.forEach(file => {
           const folder = file.mimetype.startsWith('image/') ? 'images' : 'pdfs';
             attachments.push({
-              url: `/uploads/exercises/${folder}/${file.filename}`,  // ✅ CORRETO
+              url: `/uploads/exercises/${folder}/${file.filename}`,
               type: file.mimetype.startsWith('image/') ? 'image' : 'pdf',
               filename: file.originalname
             });
@@ -71,13 +99,18 @@ exports.createExercise = [
       const exercise = new Exercise({
         title,
         description,
-        subject,
+        subject: finalSubject,
+        subjectId: finalSubjectId,
         tags: tags ? JSON.parse(tags) : [],
         attachments,
         author: req.user.id
       });
 
       await exercise.save();
+      
+      // Popular subject antes de retornar
+      await exercise.populate("subjectId", "name slug");
+      
       res.status(201).json(exercise);
       
     } catch (err) {
@@ -91,6 +124,7 @@ exports.getExercises = async (req, res) => {
   try {
     const exercises = await Exercise.find()
       .populate("author", "username avatar")
+      .populate("subjectId", "name slug")
       .populate("likes", "_id")
       .populate("dislikes", "_id")
       .sort({ createdAt: -1 });
@@ -118,6 +152,7 @@ exports.getExerciseById = async (req, res) => {
   try {
     const exercise = await Exercise.findById(req.params.id)
       .populate("author", "username avatar")
+      .populate("subjectId", "name slug")
       .populate("likes", "username")
       .populate("dislikes", "username");
 
@@ -144,6 +179,8 @@ exports.toggleLike = async (req, res) => {
     const hasLiked = exercise.likes.some(likeId => likeId.toString() === userId.toString());
     const hasDisliked = exercise.dislikes.some(dislikeId => dislikeId.toString() === userId.toString());
 
+    const wasLiked = hasLiked;
+    
     if (hasLiked) {
       // Remover like
       exercise.likes = exercise.likes.filter(id => id.toString() !== userId.toString());
@@ -169,6 +206,33 @@ exports.toggleLike = async (req, res) => {
       .populate("author", "username avatar")
       .populate("likes", "username")
       .populate("dislikes", "username");
+
+    // Criar notificação de like apenas quando o like é adicionado (não removido)
+    // e apenas se o autor do exercício for diferente do usuário que deu like
+    if (!wasLiked && updatedExercise.author) {
+      const exerciseAuthorId = updatedExercise.author._id 
+        ? updatedExercise.author._id.toString() 
+        : updatedExercise.author.toString();
+      const likerId = userId.toString();
+
+      // Só notificar se não for o próprio autor
+      if (exerciseAuthorId !== likerId) {
+        const likerUsername = req.user?.username || "Alguém";
+        
+        const io = req.app.get("io");
+        if (io) {
+          await createNotification(
+            io,
+            exerciseAuthorId,
+            "exercise_like",
+            `${likerUsername} gostou do teu exercício "${exercise.title}"`,
+            `exercise.html?id=${exercise._id}`,
+            exercise._id,
+            null
+          );
+        }
+      }
+    }
 
     res.json(updatedExercise);
   } catch (err) {
@@ -232,7 +296,7 @@ exports.updateExercise = [
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      const { title, description, subject, tags } = req.body;
+      const { title, description, subject, subjectId, tags } = req.body;
 
       const exercise = await Exercise.findById(id);
       if (!exercise) {
@@ -247,7 +311,26 @@ exports.updateExercise = [
       // Atualizar campos
       if (title) exercise.title = title;
       if (description) exercise.description = description;
-      if (subject) exercise.subject = subject;
+      
+      // Atualizar subjectId se fornecido
+      if (subjectId) {
+        const subjectDoc = await Subject.findById(subjectId);
+        if (!subjectDoc) {
+          return res.status(400).json({ message: "Disciplina não encontrada." });
+        }
+        exercise.subjectId = subjectId;
+        exercise.subject = subjectDoc.name; // Manter compatibilidade
+      } else if (subject) {
+        // Se subjectId não fornecido mas subject (string) sim, tentar encontrar
+        const subjectDoc = await Subject.findOne({ name: subject });
+        if (subjectDoc) {
+          exercise.subjectId = subjectDoc._id;
+          exercise.subject = subjectDoc.name;
+        } else {
+          exercise.subject = subject;
+        }
+      }
+      
       if (tags) exercise.tags = JSON.parse(tags);
 
       // Remover anexos se especificado
@@ -286,6 +369,7 @@ exports.updateExercise = [
       
       // Popular campos para retornar
       await exercise.populate("author", "username avatar");
+      await exercise.populate("subjectId", "name slug");
       await exercise.populate("likes", "username");
       await exercise.populate("dislikes", "username");
 
@@ -327,5 +411,69 @@ exports.deleteExercise = async (req, res) => {
   } catch (err) {
     console.error('Erro deleteExercise:', err);
     res.status(500).json({ message: "Erro ao apagar exercício" });
+  }
+};
+
+// ==============================
+// SAVE/UNSAVE EXERCISE
+// ==============================
+exports.saveExercise = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const exercise = await Exercise.findById(id);
+    if (!exercise) {
+      return res.status(404).json({ message: "Exercício não encontrado" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Utilizador não encontrado" });
+    }
+
+    // Verificar se já está guardado
+    const isAlreadySaved = user.savedExercises.some(
+      savedId => savedId.toString() === id
+    );
+
+    if (isAlreadySaved) {
+      return res.status(400).json({ message: "Exercício já está guardado" });
+    }
+
+    // Adicionar aos guardados usando $addToSet para garantir que não há duplicados
+    await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { savedExercises: id } },
+      { new: true }
+    );
+
+    res.json({ message: "Exercício guardado com sucesso" });
+  } catch (err) {
+    console.error('Erro saveExercise:', err);
+    res.status(500).json({ message: "Erro ao guardar exercício" });
+  }
+};
+
+exports.unsaveExercise = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Utilizador não encontrado" });
+    }
+
+    // Remover dos guardados
+    user.savedExercises = user.savedExercises.filter(
+      savedId => savedId.toString() !== id
+    );
+    await user.save();
+
+    res.json({ message: "Exercício removido dos guardados" });
+  } catch (err) {
+    console.error('Erro unsaveExercise:', err);
+    res.status(500).json({ message: "Erro ao remover exercício dos guardados" });
   }
 };

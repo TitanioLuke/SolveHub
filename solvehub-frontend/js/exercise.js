@@ -5,13 +5,15 @@ const params = new URLSearchParams(window.location.search);
 const exerciseId = params.get("id");
 let currentUser = null;
 let currentExercise = null; // Armazenar exercício atual para atualizar sidebar quando user carregar
-let commentsInterval = null;
 let expandedReplies = new Set(); // IDs dos comentários com respostas expandidas
 let openReplyForms = new Set(); // IDs dos comentários com formulários de resposta abertos
 let replyFormContents = new Map(); // Conteúdo dos formulários de resposta (commentId -> content)
 let focusedTextareaId = null; // ID do textarea que está focado
 let commentsSortMode = localStorage.getItem("commentsSortMode") || "best"; // Modo de ordenação: "best" ou "recent"
 let lastLoadedComments = []; // Guardar comentários em memória para re-ordenar sem recarregar
+let selectedFiles = []; // Guardar ficheiros selecionados para o formulário de resposta principal
+let replyFiles = new Map(); // Guardar ficheiros selecionados para cada resposta (commentId -> files[])
+let exerciseSocket = null; // Socket.IO para comentários do exercício
 
 // ===============================
 //  LOAD LOGGED USER
@@ -50,6 +52,13 @@ async function loadLoggedUser() {
 
     // Atualizar avatar (imagem ou iniciais)
     updateAvatarDisplay(user);
+
+    // Mostrar link Admin se for admin
+    showAdminLink(user);
+    // Também chamar a função global centralizada
+    if (window.showAdminLinkIfAuthorized) {
+        window.showAdminLinkIfAuthorized();
+    }
 
     // Atualizar avatar do formulário de comentário
     const commentAvatar = document.getElementById("commentAuthorAvatar");
@@ -248,23 +257,58 @@ function renderExercise(exercise) {
   
   // Verificar se o utilizador é o dono do exercício
   const isOwner = isExerciseOwner(exercise);
+  const userRole = currentUser ? (currentUser.role || "").toUpperCase() : "";
+  const isAdmin = currentUser && userRole === "ADMIN";
+  const canReport = currentUser && !isOwner;
   
-  // Botões de ação (editar/remover) - apenas se for o dono
-  const actionsHtml = isOwner ? `
-    <div class="exercise-actions">
-      <button type="button" class="exercise-action-btn" onclick="editExercise('${exercise._id}')" title="Editar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-      </button>
-      <button type="button" class="exercise-action-btn delete" onclick="deleteExercise('${exercise._id}')" title="Remover">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-        </svg>
-      </button>
-    </div>
-  ` : "";
+  // Botões de ação
+  let actionsHtml = "";
+  const hasActions = isOwner || isAdmin || canReport;
+  
+  if (hasActions) {
+    actionsHtml = `<div class="exercise-actions">`;
+    
+    // Botões do dono/admin
+    if (isOwner || isAdmin) {
+      if (isOwner) {
+        actionsHtml += `
+          <button type="button" class="exercise-action-btn" onclick="editExercise('${exercise._id}')" title="Editar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>`;
+      }
+      if (isOwner) {
+        actionsHtml += `
+          <button type="button" class="exercise-action-btn delete" onclick="deleteExercise('${exercise._id}')" title="Remover">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>`;
+      } else if (isAdmin) {
+        actionsHtml += `
+          <button type="button" class="exercise-action-btn delete" onclick="adminDeleteExercise('${exercise._id}')" title="Eliminar (Admin)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>`;
+      }
+    }
+    
+    // Botão de report (se não for dono e estiver autenticado)
+    if (canReport) {
+      actionsHtml += `
+        <button type="button" class="exercise-action-btn report-btn" onclick="openReportModal('EXERCISE', '${exercise._id}')" title="Reportar exercício">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+            <line x1="4" y1="22" x2="4" y2="15"/>
+          </svg>
+        </button>`;
+    }
+    
+    actionsHtml += `</div>`;
+  }
   
   // Renderizar anexos com botões de download
   const attachmentsHtml = exercise.attachments && exercise.attachments.length > 0
@@ -444,6 +488,18 @@ function updateSidebar(exercise) {
       </div>
     </div>
 
+    ${!isExerciseOwner(exercise) && userForButtons ? `
+    <!-- Botão Guardar -->
+    <div class="sidebar-info-section">
+      <button type="button" class="sidebar-save-btn" id="saveExerciseBtn" data-exercise-id="${exercise._id}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+        </svg>
+        <span id="saveExerciseText">Guardar</span>
+      </button>
+    </div>
+    ` : ''}
+
     <!-- Estatísticas -->
     <div class="sidebar-info-section">
       <div class="sidebar-stats">
@@ -456,8 +512,13 @@ function updateSidebar(exercise) {
   `;
   
   // Anexar event listeners diretamente aos botões após renderizar
-  setTimeout(() => {
+  setTimeout(async () => {
     attachVotingButtonListeners(exercise._id);
+    
+    // Configurar botão de guardar se existir (apenas se não for o dono)
+    if (!isExerciseOwner(exercise) && userForButtons) {
+      await setupSaveButton(exercise._id);
+    }
     
     // Debug: verificar se os botões existem e são clicáveis
     const likeBtn = document.querySelector(`.youtube-like-btn[data-exercise-id="${exercise._id}"]`);
@@ -478,6 +539,98 @@ function updateSidebar(exercise) {
     }
     console.log("===========================");
   }, 100);
+}
+
+// ===============================
+//  SETUP SAVE BUTTON
+// ===============================
+async function setupSaveButton(exerciseId) {
+  const saveBtn = document.getElementById("saveExerciseBtn");
+  const saveText = document.getElementById("saveExerciseText");
+  
+  if (!saveBtn || !saveText) return;
+
+  try {
+    // Verificar se o exercício já está guardado
+    const savedExercises = await apiGet("/auth/me/saved");
+    const isSaved = Array.isArray(savedExercises) && savedExercises.some(ex => ex._id === exerciseId);
+    
+    // Atualizar estado do botão
+    if (isSaved) {
+      saveBtn.classList.add("saved");
+      saveText.textContent = "Guardado";
+      saveBtn.title = "Tirar de guardado";
+    } else {
+      saveBtn.classList.remove("saved");
+      saveText.textContent = "Guardar";
+      saveBtn.title = "Guardar exercício";
+    }
+
+    // Adicionar event listener
+    saveBtn.addEventListener("click", async () => {
+      await toggleSaveExercise(exerciseId, saveBtn, saveText);
+    });
+  } catch (error) {
+    console.error("Erro ao verificar estado de guardado:", error);
+    // Mesmo com erro, permitir tentar guardar
+    saveBtn.addEventListener("click", async () => {
+      await toggleSaveExercise(exerciseId, saveBtn, saveText);
+    });
+  }
+}
+
+// ===============================
+//  TOGGLE SAVE EXERCISE
+// ===============================
+async function toggleSaveExercise(exerciseId, buttonEl, textEl) {
+  if (!currentUser) {
+    alert("Precisas de estar autenticado para guardar exercícios.");
+    return;
+  }
+
+  // Prevenir múltiplos cliques simultâneos
+  if (buttonEl.disabled || buttonEl.dataset.processing === "true") {
+    return;
+  }
+
+  const isCurrentlySaved = buttonEl.classList.contains("saved");
+  const originalText = textEl.textContent;
+  
+  try {
+    // Marcar como processando e desativar botão
+    buttonEl.dataset.processing = "true";
+    buttonEl.disabled = true;
+    textEl.textContent = isCurrentlySaved ? "A remover..." : "A guardar...";
+
+    if (isCurrentlySaved) {
+      // Remover dos guardados
+      await apiDelete(`/exercises/${exerciseId}/save`);
+      buttonEl.classList.remove("saved");
+      textEl.textContent = "Guardar";
+      buttonEl.title = "Guardar exercício";
+    } else {
+      // Guardar
+      await apiPost(`/exercises/${exerciseId}/save`, {});
+      buttonEl.classList.add("saved");
+      textEl.textContent = "Guardado";
+      buttonEl.title = "Tirar de guardado";
+    }
+  } catch (error) {
+    console.error("Erro ao guardar/remover exercício:", error);
+    
+    // Se o erro for que já está guardado, atualizar o estado do botão
+    if (error?.message && error.message.includes("já está guardado")) {
+      buttonEl.classList.add("saved");
+      textEl.textContent = "Guardado";
+      buttonEl.title = "Tirar de guardado";
+    } else {
+      alert(error?.message || "Erro ao guardar exercício. Tenta novamente.");
+      textEl.textContent = originalText;
+    }
+  } finally {
+    buttonEl.disabled = false;
+    buttonEl.dataset.processing = "false";
+  }
 }
 
 // ===============================
@@ -569,6 +722,12 @@ function saveCommentsState() {
           focusedTextareaId = commentId;
         }
       }
+      
+      // Salvar ficheiros do input se existirem
+      const fileInput = document.getElementById(`reply-attachments-${commentId}`);
+      if (fileInput && fileInput.files.length > 0) {
+        replyFiles.set(commentId, Array.from(fileInput.files));
+      }
     }
   });
 }
@@ -599,15 +758,39 @@ function restoreCommentsState() {
       
       // Recriar formulário se necessário
       const savedContent = replyFormContents.get(commentId) || '';
+      const savedFiles = replyFiles.get(commentId) || [];
       formContainer.innerHTML = `
         <div class="reply-form">
           <textarea id="reply-content-${commentId}" placeholder="Escreve a tua resposta..." rows="3">${savedContent}</textarea>
+          
+          <!-- FILE UPLOAD -->
+          <div class="comment-upload-area">
+            <div class="upload-preview-container" id="reply-upload-preview-${commentId}"></div>
+            <label for="reply-attachments-${commentId}" class="upload-label">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              </svg>
+              <span>Adicionar ficheiros</span>
+            </label>
+            <input 
+              type="file" 
+              id="reply-attachments-${commentId}" 
+              name="attachments"
+              accept="image/*,application/pdf"
+              multiple
+              class="upload-input-hidden"
+            />
+          </div>
+          
           <div class="reply-form-actions">
             <button type="button" class="btn-outline" onclick="cancelReply('${commentId}')">Cancelar</button>
             <button type="button" class="btn-primary" onclick="submitReply('${commentId}')">Publicar</button>
           </div>
         </div>
       `;
+      
+      // Setup file upload para esta resposta
+      setupReplyFileUpload(commentId);
       
       // Restaurar foco se este era o textarea focado
       if (focusedTextareaId === commentId) {
@@ -845,6 +1028,24 @@ const hasDisliked =
             </svg>
             <span>Responder</span>
           </button>
+          ${currentUser && comment.author?._id !== currentUser.id ? `
+            <button class="comment-action-btn" onclick="openReportModal('ANSWER', '${comment._id}')" title="Reportar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                <line x1="4" y1="22" x2="4" y2="15"/>
+              </svg>
+            </button>
+          ` : ""}
+          ${(() => {
+            const userRole = currentUser ? (currentUser.role || "").toUpperCase() : "";
+            return currentUser && userRole === "ADMIN";
+          })() ? `
+            <button class="comment-action-btn delete" onclick="adminDeleteComment('${comment._id}')" title="Eliminar (Admin)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          ` : ""}
         </div>
         ${repliesHtml}
         <div id="reply-form-${comment._id}" style="display: none;"></div>
@@ -908,8 +1109,12 @@ function renderReply(reply) {
        </div>`
     : "";
 
+  const userRole = currentUser ? (currentUser.role || "").toUpperCase() : "";
+  const isAdmin = currentUser && userRole === "ADMIN";
+  const canReport = currentUser && reply.author?._id !== currentUser.id;
+  
   return `
-    <div class="reply-item">
+    <div class="reply-item" data-comment-id="${reply._id}">
       <div class="comment-avatar">${authorAvatar}</div>
       <div style="flex: 1;">
         <div class="comment-header">
@@ -920,6 +1125,25 @@ function renderReply(reply) {
         </div>
         <div class="comment-content">${reply.content || ""}</div>
         ${attachmentsHtml}
+        ${canReport || isAdmin ? `
+          <div class="comment-actions" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);">
+            ${canReport ? `
+              <button class="comment-action-btn" onclick="openReportModal('ANSWER', '${reply._id}')" title="Reportar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                  <line x1="4" y1="22" x2="4" y2="15"/>
+                </svg>
+              </button>
+            ` : ""}
+            ${isAdmin ? `
+              <button class="comment-action-btn delete" onclick="adminDeleteComment('${reply._id}')" title="Eliminar (Admin)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+              </button>
+            ` : ""}
+          </div>
+        ` : ""}
       </div>
     </div>
   `;
@@ -978,21 +1202,52 @@ window.showReplyForm = function(commentId) {
   
   if (formContainer.style.display === 'none' || !formContainer.innerHTML.trim()) {
     formContainer.style.display = 'block';
+    // Inicializar lista de ficheiros se não existir
+    if (!replyFiles.has(commentId)) {
+      replyFiles.set(commentId, []);
+    }
+    
     formContainer.innerHTML = `
       <div class="reply-form">
         <textarea id="reply-content-${commentId}" placeholder="Escreve a tua resposta..." rows="3"></textarea>
+        
+        <!-- FILE UPLOAD -->
+        <div class="comment-upload-area">
+          <div class="upload-preview-container" id="reply-upload-preview-${commentId}"></div>
+          <label for="reply-attachments-${commentId}" class="upload-label">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+            </svg>
+            <span>Adicionar ficheiros</span>
+          </label>
+          <input 
+            type="file" 
+            id="reply-attachments-${commentId}" 
+            name="attachments"
+            accept="image/*,application/pdf"
+            multiple
+            class="upload-input-hidden"
+          />
+        </div>
+        
         <div class="reply-form-actions">
           <button type="button" class="btn-outline" onclick="cancelReply('${commentId}')">Cancelar</button>
           <button type="button" class="btn-primary" onclick="submitReply('${commentId}')">Publicar</button>
         </div>
       </div>
     `;
+    
+    // Setup file upload para esta resposta
+    setupReplyFileUpload(commentId);
+    
     document.getElementById(`reply-content-${commentId}`).focus();
     // Adicionar ao conjunto de formulários abertos
     openReplyForms.add(commentId);
   } else {
     formContainer.style.display = 'none';
     formContainer.innerHTML = '';
+    // Limpar ficheiros desta resposta
+    replyFiles.delete(commentId);
     // Remover do conjunto de formulários abertos
     openReplyForms.delete(commentId);
   }
@@ -1006,6 +1261,8 @@ window.cancelReply = function(commentId) {
   if (formContainer) {
     formContainer.style.display = 'none';
     formContainer.innerHTML = '';
+    // Limpar ficheiros desta resposta
+    replyFiles.delete(commentId);
     // Remover do conjunto de formulários abertos
     openReplyForms.delete(commentId);
   }
@@ -1033,12 +1290,17 @@ window.submitReply = async function(commentId) {
     formData.append("parentAnswerId", commentId);
   }
   
+  // Adicionar ficheiros
+  const fileInput = document.getElementById(`reply-attachments-${commentId}`);
+  if (fileInput && fileInput.files.length > 0) {
+    Array.from(fileInput.files).forEach(file => {
+      formData.append("attachments", file);
+    });
+  }
+  
   console.log("Submetendo resposta - content:", content, "exerciseId:", exerciseId, "parentAnswerId:", commentId);
 
   try {
-    // Parar polling temporariamente para evitar conflitos
-    stopCommentsPolling();
-    
     const response = await apiPostFormData("/answers", formData);
     console.log("Resposta criada com sucesso:", response);
     
@@ -1050,11 +1312,12 @@ window.submitReply = async function(commentId) {
       openReplyForms.delete(commentId);
     }
     
-    // Recarregar comentários (que vai restaurar o estado)
-    await loadComments();
+    // Limpar ficheiros desta resposta
+    replyFiles.delete(commentId);
     
-    // Reiniciar polling
-    startCommentsPolling();
+    // O socket vai atualizar automaticamente via evento comment:created
+    // Mas podemos recarregar imediatamente para feedback mais rápido
+    await loadComments();
   } catch (error) {
     console.error("Erro ao criar resposta:", error);
     console.error("Detalhes do erro:", {
@@ -1062,10 +1325,10 @@ window.submitReply = async function(commentId) {
       status: error.status,
       response: error.response
     });
-    alert(error.message || "Erro ao publicar resposta. Tenta novamente.");
-    
-    // Reiniciar polling mesmo em caso de erro
-    startCommentsPolling();
+    // Não mostrar alerta se o erro for apenas de rede mas a resposta foi criada
+    if (error.message && !error.message.includes("Failed to fetch")) {
+      alert(error.message || "Erro ao publicar resposta. Tenta novamente.");
+    }
   }
 };
 
@@ -1110,12 +1373,16 @@ async function submitComment(e) {
     document.getElementById("commentForm").reset();
     document.getElementById("commentUploadPreview").innerHTML = "";
     fileInput.value = "";
+    selectedFiles = []; // Limpar lista de ficheiros
     
     // Recarregar comentários
     await loadComments();
   } catch (error) {
     console.error("Erro ao criar comentário:", error);
-    alert(error.message || "Erro ao publicar comentário. Tenta novamente.");
+    // Não mostrar alerta se o erro for apenas de rede mas a resposta foi criada
+    if (error.message && !error.message.includes("Failed to fetch")) {
+      alert(error.message || "Erro ao publicar comentário. Tenta novamente.");
+    }
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalText;
@@ -1394,6 +1661,173 @@ function updateExerciseVotingUI(updatedExercise, exerciseId) {
 // ===============================
 //  FILE UPLOAD PREVIEW
 // ===============================
+// Função auxiliar para renderizar um preview de ficheiro
+function renderFilePreview(file, index, previewContainer) {
+  if (file.type.startsWith("image/")) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const div = document.createElement("div");
+      div.className = "upload-preview-item";
+      div.setAttribute("data-file-index", index);
+      div.innerHTML = `
+        <img src="${event.target.result}" alt="${file.name}" />
+        <button type="button" class="remove-file" onclick="removeFilePreview(${index})" title="Remover ficheiro">×</button>
+      `;
+      previewContainer.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // PDF ou outro tipo de ficheiro
+    const div = document.createElement("div");
+    div.className = "upload-preview-item";
+    div.setAttribute("data-file-index", index);
+    div.innerHTML = `
+      <div style="width: 80px; height: 80px; padding: 8px; background: #f1f5f9; border-radius: 8px; border: 2px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+        </svg>
+        <span style="font-size: 10px; color: var(--text-muted); text-align: center; word-break: break-word; max-width: 100%;">${file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}</span>
+      </div>
+      <button type="button" class="remove-file" onclick="removeFilePreview(${index})" title="Remover ficheiro">×</button>
+    `;
+    previewContainer.appendChild(div);
+  }
+}
+
+// Função para atualizar todos os previews
+function refreshFilePreviews() {
+  const fileInput = document.getElementById("commentAttachments");
+  const previewContainer = document.getElementById("commentUploadPreview");
+  
+  if (!fileInput || !previewContainer) return;
+  
+  // Sincronizar selectedFiles com o input
+  selectedFiles = Array.from(fileInput.files);
+  
+  previewContainer.innerHTML = "";
+  selectedFiles.forEach((file, index) => {
+    renderFilePreview(file, index, previewContainer);
+  });
+}
+
+// Função para renderizar preview de ficheiro de resposta
+function renderReplyFilePreview(file, index, previewContainer, commentId) {
+  if (file.type.startsWith("image/")) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const div = document.createElement("div");
+      div.className = "upload-preview-item";
+      div.setAttribute("data-file-index", index);
+      div.innerHTML = `
+        <img src="${event.target.result}" alt="${file.name}" />
+        <button type="button" class="remove-file" onclick="removeReplyFilePreview('${commentId}', ${index})" title="Remover ficheiro">×</button>
+      `;
+      previewContainer.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // PDF ou outro tipo de ficheiro
+    const div = document.createElement("div");
+    div.className = "upload-preview-item";
+    div.setAttribute("data-file-index", index);
+    div.innerHTML = `
+      <div style="width: 80px; height: 80px; padding: 8px; background: #f1f5f9; border-radius: 8px; border: 2px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+        </svg>
+        <span style="font-size: 10px; color: var(--text-muted); text-align: center; word-break: break-word; max-width: 100%;">${file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}</span>
+      </div>
+      <button type="button" class="remove-file" onclick="removeReplyFilePreview('${commentId}', ${index})" title="Remover ficheiro">×</button>
+    `;
+    previewContainer.appendChild(div);
+  }
+}
+
+// Função para atualizar previews de uma resposta
+function refreshReplyFilePreviews(commentId) {
+  const fileInput = document.getElementById(`reply-attachments-${commentId}`);
+  const previewContainer = document.getElementById(`reply-upload-preview-${commentId}`);
+  
+  if (!fileInput || !previewContainer) return;
+  
+  // Sincronizar replyFiles com o input
+  const files = Array.from(fileInput.files);
+  replyFiles.set(commentId, files);
+  
+  previewContainer.innerHTML = "";
+  files.forEach((file, index) => {
+    renderReplyFilePreview(file, index, previewContainer, commentId);
+  });
+}
+
+// Setup file upload para uma resposta específica
+function setupReplyFileUpload(commentId) {
+  const fileInput = document.getElementById(`reply-attachments-${commentId}`);
+  const previewContainer = document.getElementById(`reply-upload-preview-${commentId}`);
+  
+  if (!fileInput || !previewContainer) return;
+  
+  // Inicializar lista de ficheiros se não existir
+  if (!replyFiles.has(commentId)) {
+    replyFiles.set(commentId, []);
+  }
+  
+  fileInput.addEventListener("change", (e) => {
+    const newFiles = Array.from(e.target.files);
+    const existingFiles = replyFiles.get(commentId) || [];
+    
+    // Adicionar novos ficheiros aos existentes (evitar duplicados)
+    newFiles.forEach(newFile => {
+      const exists = existingFiles.some(existingFile => 
+        existingFile.name === newFile.name && 
+        existingFile.size === newFile.size &&
+        existingFile.lastModified === newFile.lastModified
+      );
+      if (!exists) {
+        existingFiles.push(newFile);
+      }
+    });
+    
+    // Atualizar o input com todos os ficheiros
+    const dt = new DataTransfer();
+    existingFiles.forEach(file => dt.items.add(file));
+    fileInput.files = dt.files;
+    
+    // Atualizar previews
+    refreshReplyFilePreviews(commentId);
+  });
+  
+  // Renderizar previews iniciais se houver ficheiros
+  if (replyFiles.has(commentId) && replyFiles.get(commentId).length > 0) {
+    const dt = new DataTransfer();
+    replyFiles.get(commentId).forEach(file => dt.items.add(file));
+    fileInput.files = dt.files;
+    refreshReplyFilePreviews(commentId);
+  }
+}
+
+// Remover ficheiro de uma resposta
+window.removeReplyFilePreview = function(commentId, index) {
+  const fileInput = document.getElementById(`reply-attachments-${commentId}`);
+  const previewContainer = document.getElementById(`reply-upload-preview-${commentId}`);
+  
+  if (!fileInput) return;
+  
+  const files = replyFiles.get(commentId) || [];
+  files.splice(index, 1);
+  replyFiles.set(commentId, files);
+  
+  // Atualizar o input
+  const dt = new DataTransfer();
+  files.forEach(file => dt.items.add(file));
+  fileInput.files = dt.files;
+  
+  // Recriar todos os previews
+  refreshReplyFilePreviews(commentId);
+};
+
 function setupFileUpload() {
   const fileInput = document.getElementById("commentAttachments");
   const previewContainer = document.getElementById("commentUploadPreview");
@@ -1401,37 +1835,28 @@ function setupFileUpload() {
   if (!fileInput || !previewContainer) return;
 
   fileInput.addEventListener("change", (e) => {
-    previewContainer.innerHTML = "";
-    const files = Array.from(e.target.files);
-
-    files.forEach((file, index) => {
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const div = document.createElement("div");
-          div.className = "upload-preview-item";
-          div.innerHTML = `
-            <img src="${event.target.result}" alt="${file.name}" />
-            <button type="button" class="remove-file" onclick="removeFilePreview(${index})">×</button>
-          `;
-          previewContainer.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        const div = document.createElement("div");
-        div.className = "upload-preview-item";
-        div.innerHTML = `
-          <div style="padding: 8px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; gap: 8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            </svg>
-            <span style="font-size: 12px;">${file.name}</span>
-            <button type="button" class="remove-file" onclick="removeFilePreview(${index})" style="position: static; margin-left: 8px;">×</button>
-          </div>
-        `;
-        previewContainer.appendChild(div);
+    const newFiles = Array.from(e.target.files);
+    
+    // Adicionar novos ficheiros aos existentes (evitar duplicados)
+    newFiles.forEach(newFile => {
+      // Verificar se o ficheiro já não existe (por nome e tamanho)
+      const exists = selectedFiles.some(existingFile => 
+        existingFile.name === newFile.name && 
+        existingFile.size === newFile.size &&
+        existingFile.lastModified === newFile.lastModified
+      );
+      if (!exists) {
+        selectedFiles.push(newFile);
       }
     });
+    
+    // Atualizar o input com todos os ficheiros
+    const dt = new DataTransfer();
+    selectedFiles.forEach(file => dt.items.add(file));
+    fileInput.files = dt.files;
+    
+    // Atualizar previews
+    refreshFilePreviews();
   });
 }
 
@@ -1444,34 +1869,16 @@ window.removeFilePreview = function(index) {
   
   if (!fileInput) return;
 
+  // Remover o ficheiro da lista
+  selectedFiles.splice(index, 1);
+  
+  // Atualizar o input
   const dt = new DataTransfer();
-  const files = Array.from(fileInput.files);
-  
-  files.forEach((file, i) => {
-    if (i !== index) {
-      dt.items.add(file);
-    }
-  });
-  
+  selectedFiles.forEach(file => dt.items.add(file));
   fileInput.files = dt.files;
   
-  // Recriar preview
-  previewContainer.innerHTML = "";
-  Array.from(fileInput.files).forEach((file, i) => {
-    if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const div = document.createElement("div");
-        div.className = "upload-preview-item";
-        div.innerHTML = `
-          <img src="${event.target.result}" alt="${file.name}" />
-          <button type="button" class="remove-file" onclick="removeFilePreview(${i})">×</button>
-        `;
-        previewContainer.appendChild(div);
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+  // Recriar todos os previews
+  refreshFilePreviews();
 }
 
 // ===============================
@@ -1541,19 +1948,79 @@ function setupCommentsSort() {
 }
 
 // ===============================
-//  REAL-TIME COMMENTS (POLLING)
+//  REAL-TIME COMMENTS (SOCKET.IO)
 // ===============================
-function startCommentsPolling() {
-  // Carregar comentários a cada 5 segundos
-  commentsInterval = setInterval(() => {
-    loadComments();
-  }, 5000);
+function setupExerciseSocket() {
+  const token = localStorage.getItem("token");
+  if (!token || !exerciseId) {
+    console.log("Sem token ou exerciseId, socket não inicializado");
+    return;
+  }
+
+  // Verificar se Socket.IO está carregado
+  if (typeof io === "undefined") {
+    console.error("Socket.IO não está carregado. Adiciona o script no HTML.");
+    return;
+  }
+
+  // Desconectar socket anterior se existir
+  if (exerciseSocket) {
+    exerciseSocket.disconnect();
+  }
+
+  // Conectar socket para o exercício
+  exerciseSocket = io("http://localhost:5050", {
+    auth: {
+      token: token,
+    },
+    transports: ["websocket", "polling"],
+  });
+
+  exerciseSocket.on("connect", () => {
+    console.log("✅ Conectado ao WebSocket de comentários");
+    
+    // Juntar-se à room do exercício
+    if (exerciseId) {
+      exerciseSocket.emit("joinExercise", { exerciseId });
+      console.log(`📝 Juntou-se ao exercício ${exerciseId}`);
+    }
+  });
+
+  exerciseSocket.on("disconnect", () => {
+    console.log("❌ Desconectado do WebSocket de comentários");
+  });
+
+  exerciseSocket.on("connect_error", (error) => {
+    console.error("Erro de conexão WebSocket:", error);
+  });
+
+  // Ouvir evento de novo comentário
+  exerciseSocket.on("comment:created", (data) => {
+    console.log("Novo comentário criado:", data);
+    if (data.exerciseId === exerciseId) {
+      // Recarregar comentários
+      loadComments();
+    }
+  });
+
+  // Ouvir evento de atualização de votos
+  exerciseSocket.on("comment:votesUpdated", (data) => {
+    console.log("Votos atualizados:", data);
+    if (data.exerciseId === exerciseId) {
+      // Recarregar comentários (ou atualizar só aquele comentário se for fácil)
+      loadComments();
+    }
+  });
 }
 
-function stopCommentsPolling() {
-  if (commentsInterval) {
-    clearInterval(commentsInterval);
-    commentsInterval = null;
+function disconnectExerciseSocket() {
+  if (exerciseSocket) {
+    if (exerciseId) {
+      exerciseSocket.emit("leaveExercise", { exerciseId });
+    }
+    exerciseSocket.disconnect();
+    exerciseSocket = null;
+    console.log("Socket do exercício desconectado");
   }
 }
 
@@ -1574,9 +2041,14 @@ async function initExercisePage() {
   
   // Carregar utilizador em paralelo (não bloquear se houver erro)
   // Usar Promise para não bloquear o resto da página
-  loadLoggedUser().catch(err => {
-    console.error("Erro ao carregar utilizador (não crítico):", err);
-  });
+  loadLoggedUser()
+    .then(() => {
+      // Após carregar utilizador, inicializar socket
+      setupExerciseSocket();
+    })
+    .catch(err => {
+      console.error("Erro ao carregar utilizador (não crítico):", err);
+    });
   
   // Carregar comentários
   try {
@@ -1596,19 +2068,230 @@ async function initExercisePage() {
   setupLogout();
   setupCommentsSort();
   
-  // Iniciar polling de comentários
-  startCommentsPolling();
+  // Socket será inicializado após carregar utilizador (ver loadLoggedUser acima)
+  // Se já houver token, inicializar imediatamente
+  if (localStorage.getItem("token")) {
+    setupExerciseSocket();
+  }
   
-  // Parar polling quando a página não está visível
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      stopCommentsPolling();
-    } else {
-      startCommentsPolling();
-    }
+  // Cleanup ao sair da página
+  window.addEventListener("beforeunload", () => {
+    disconnectExerciseSocket();
   });
   
   console.log("Página de exercício inicializada com sucesso");
+
+  // Verificar se há highlightAnswerId na URL
+  const params = new URLSearchParams(window.location.search);
+  const highlightAnswerId = params.get("highlightAnswerId");
+  if (highlightAnswerId) {
+    // Aguardar comentários carregarem e depois fazer highlight
+    setTimeout(() => {
+      highlightComment(highlightAnswerId);
+    }, 1000);
+  }
+}
+
+// ===============================
+//  SHOW ADMIN LINK
+// ===============================
+function showAdminLink(user) {
+  const role = (user.role || "").toUpperCase();
+  if (role === "ADMIN") {
+    const menu = document.querySelector(".menu");
+    if (menu && !document.getElementById("adminMenuItem")) {
+      const adminLink = document.createElement("a");
+      adminLink.id = "adminMenuItem";
+      adminLink.className = "menu-item";
+      adminLink.href = "admin.html";
+      adminLink.innerHTML = `
+        <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+          <path stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        Admin
+      `;
+      menu.appendChild(adminLink);
+    }
+  }
+}
+
+// ===============================
+//  HIGHLIGHT COMMENT
+// ===============================
+function highlightComment(commentId) {
+  const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
+  if (!commentEl) {
+    // Se não encontrar, pode estar numa reply - procurar em todas as replies
+    const allReplies = document.querySelectorAll(".reply-item");
+    for (const reply of allReplies) {
+      if (reply.querySelector(`[data-comment-id="${commentId}"]`) || reply.dataset.commentId === commentId) {
+        reply.classList.add("comment-highlight");
+        reply.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => {
+          reply.classList.remove("comment-highlight");
+        }, 5000);
+        return;
+      }
+    }
+    // Tentar novamente após um delay (comentários podem ainda estar a carregar)
+    setTimeout(() => highlightComment(commentId), 500);
+    return;
+  }
+
+  commentEl.classList.add("comment-highlight");
+  commentEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  
+  setTimeout(() => {
+    commentEl.classList.remove("comment-highlight");
+  }, 5000);
+}
+
+// ===============================
+//  ADMIN DELETE EXERCISE
+// ===============================
+window.adminDeleteExercise = async function(exerciseId) {
+  if (!currentUser) {
+    alert("Sem permissões para realizar esta ação.");
+    return;
+  }
+  const userRole = (currentUser.role || "").toUpperCase();
+  if (userRole !== "ADMIN") {
+    alert("Sem permissões para realizar esta ação.");
+    return;
+  }
+
+  const confirmed = await openConfirmModal({
+    title: "Eliminar exercício?",
+    message: "Tens a certeza que queres eliminar este exercício? Esta ação não pode ser desfeita.",
+    confirmText: "Eliminar",
+    variant: "delete"
+  });
+
+  if (!confirmed) return;
+
+  try {
+    await apiDelete(`/admin/exercises/${exerciseId}`);
+    alert("Exercício eliminado com sucesso.");
+    window.location.href = "index.html";
+  } catch (err) {
+    console.error("Erro ao eliminar exercício:", err);
+    alert(err.message || "Erro ao eliminar exercício.");
+  }
+};
+
+// ===============================
+//  ADMIN DELETE COMMENT
+// ===============================
+window.adminDeleteComment = async function(commentId) {
+  if (!currentUser) {
+    alert("Sem permissões para realizar esta ação.");
+    return;
+  }
+  const userRole = (currentUser.role || "").toUpperCase();
+  if (userRole !== "ADMIN") {
+    alert("Sem permissões para realizar esta ação.");
+    return;
+  }
+
+  const confirmed = await openConfirmModal({
+    title: "Eliminar comentário?",
+    message: "Tens a certeza que queres eliminar este comentário? Esta ação não pode ser desfeita.",
+    confirmText: "Eliminar",
+    variant: "delete"
+  });
+
+  if (!confirmed) return;
+
+  try {
+    await apiDelete(`/admin/answers/${commentId}`);
+    await loadComments();
+  } catch (err) {
+    console.error("Erro ao eliminar comentário:", err);
+    alert(err.message || "Erro ao eliminar comentário.");
+  }
+};
+
+// ===============================
+//  OPEN REPORT MODAL (GLOBAL)
+// ===============================
+let reportModalTarget = null;
+
+window.openReportModal = function(targetType, targetId) {
+  if (!currentUser) {
+    window.location.href = "auth.html";
+    return;
+  }
+
+  reportModalTarget = { type: targetType, id: targetId };
+  const modal = document.getElementById("reportModal");
+  if (!modal) {
+    console.error("Modal de report não encontrado");
+    return;
+  }
+
+  document.getElementById("reportForm").reset();
+  document.getElementById("reportCharCount").textContent = "0";
+  modal.classList.remove("hidden");
+};
+
+// Setup report modal listeners (apenas uma vez)
+if (document.getElementById("reportModal")) {
+  document.getElementById("reportModalClose")?.addEventListener("click", () => {
+    document.getElementById("reportModal").classList.add("hidden");
+    document.getElementById("reportForm").reset();
+    document.getElementById("reportCharCount").textContent = "0";
+    reportModalTarget = null;
+  });
+  
+  document.getElementById("reportModalCancel")?.addEventListener("click", () => {
+    document.getElementById("reportModal").classList.add("hidden");
+    document.getElementById("reportForm").reset();
+    document.getElementById("reportCharCount").textContent = "0";
+    reportModalTarget = null;
+  });
+  
+  document.getElementById("reportDetailsTextarea")?.addEventListener("input", (e) => {
+    document.getElementById("reportCharCount").textContent = e.target.value.length;
+  });
+  
+  document.getElementById("reportForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    if (!reportModalTarget) return;
+    
+    const reason = document.getElementById("reportReasonSelect").value;
+    const details = document.getElementById("reportDetailsTextarea").value.trim();
+
+    if (!reason) {
+      alert("Seleciona um motivo.");
+      return;
+    }
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = "A enviar...";
+
+    try {
+      await apiPost("/reports", {
+        targetType: reportModalTarget.type,
+        targetId: reportModalTarget.id,
+        reason,
+        details: details || undefined
+      });
+
+      document.getElementById("reportModal").classList.add("hidden");
+      document.getElementById("reportForm").reset();
+      document.getElementById("reportCharCount").textContent = "0";
+      reportModalTarget = null;
+      alert("Report enviado com sucesso. Obrigado!");
+    } catch (err) {
+      console.error("Erro ao enviar report:", err);
+      alert(err.message || "Erro ao enviar report.");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Enviar";
+    }
+  });
 }
 
 // ===============================
@@ -1684,8 +2367,23 @@ function openEditExerciseModal(exercise) {
   const form = document.getElementById("editExerciseForm");
   const titleInput = document.getElementById("editExerciseTitle");
   const descriptionInput = document.getElementById("editExerciseDescription");
-  const subjectPills = document.querySelectorAll("#editExerciseSubjectPills .subject-pill");
+  const subjectPillsContainer = document.getElementById("editExerciseSubjectPills");
   const subjectHiddenInput = document.getElementById("editExerciseSubject");
+  const subjectIdHiddenInput = document.getElementById("editExerciseSubjectId") || (() => {
+    // Criar input hidden para subjectId se não existir
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.id = 'editExerciseSubjectId';
+    input.name = 'subjectId';
+    const form = document.getElementById("editExerciseForm");
+    if (form) {
+      const subjectGroup = form.querySelector('.form-group');
+      if (subjectGroup) {
+        subjectGroup.appendChild(input);
+      }
+    }
+    return input;
+  })();
   const tagInput = document.getElementById("editExerciseTagInput");
   const tagsListEl = document.getElementById("editExerciseTagsList");
   const attachmentsInput = document.getElementById("editExerciseAttachments");
@@ -1787,28 +2485,53 @@ function openEditExerciseModal(exercise) {
   titleInput.value = exercise.title || "";
   descriptionInput.value = exercise.description || "";
 
-  // Pré-preencher subject
-  const exerciseSubject = exercise.subject || "Cálculo";
-  subjectPills.forEach((pill) => {
-    pill.classList.remove("active");
-    if (pill.dataset.subject === exerciseSubject) {
-      pill.classList.add("active");
-      subjectHiddenInput.value = exerciseSubject;
+  // Carregar e pré-preencher subject
+  (async () => {
+    try {
+      const subjects = await fetchSubjects();
+      const exerciseSubjectId = exercise.subjectId?._id || exercise.subjectId;
+      const exerciseSubjectName = exercise.subject?.name || exercise.subject;
+      
+      if (subjectPillsContainer && window.renderSubjectPills) {
+        renderSubjectPills(
+          subjectPillsContainer, 
+          subjects, 
+          exerciseSubjectId, 
+          exerciseSubjectName,
+          (subjectId, subjectName) => {
+            subjectIdHiddenInput.value = subjectId;
+            subjectHiddenInput.value = subjectName;
+          }
+        );
+        
+        // Se não encontrou match, selecionar primeiro
+        if (!exerciseSubjectId && !exerciseSubjectName && subjects.length > 0) {
+          const firstPill = subjectPillsContainer.querySelector('.subject-pill');
+          if (firstPill) {
+            subjectIdHiddenInput.value = firstPill.dataset.subjectId;
+            subjectHiddenInput.value = firstPill.dataset.subject;
+          }
+        } else if (exerciseSubjectId || exerciseSubjectName) {
+          // Garantir que os valores estão definidos
+          if (exerciseSubjectId) {
+            subjectIdHiddenInput.value = exerciseSubjectId;
+          }
+          if (exerciseSubjectName) {
+            subjectHiddenInput.value = exerciseSubjectName;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar disciplinas:', error);
+      if (subjectPillsContainer) {
+        subjectPillsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Erro ao carregar disciplinas</p>';
+      }
     }
-  });
+  })();
 
   // Renderizar tags e anexos
   renderTags();
   renderAttachments();
-
-  // Event listeners para subject pills
-  subjectPills.forEach((pill) => {
-    pill.onclick = () => {
-      subjectPills.forEach((p) => p.classList.remove("active"));
-      pill.classList.add("active");
-      subjectHiddenInput.value = pill.dataset.subject;
-    };
-  });
 
   // Event listeners para tags
   tagInput.onkeydown = (e) => {
@@ -1902,8 +2625,9 @@ function openEditExerciseModal(exercise) {
     const title = titleInput.value.trim();
     const description = descriptionInput.value.trim();
     const subject = subjectHiddenInput.value;
+    const subjectId = subjectIdHiddenInput.value;
 
-    if (!title || !description || !subject) {
+    if (!title || !description || (!subject && !subjectId)) {
       formMessageEl.textContent = "Título, descrição e disciplina são obrigatórios.";
       formMessageEl.className = "form-message error";
       return;
@@ -1924,7 +2648,15 @@ function openEditExerciseModal(exercise) {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
-      formData.append("subject", subject);
+      
+      // Enviar subjectId se disponível, senão subject (string) para compatibilidade
+      if (subjectId) {
+        formData.append("subjectId", subjectId);
+      }
+      if (subject) {
+        formData.append("subject", subject);
+      }
+      
       formData.append("tags", JSON.stringify(currentTags));
       formData.append("removedAttachments", JSON.stringify(removedAttachments));
 
@@ -1950,9 +2682,20 @@ function openEditExerciseModal(exercise) {
 
       const updatedExercise = await res.json();
 
-      // Atualizar exercício atual
-      currentExercise = updatedExercise;
-      refreshExerciseUI();
+      // Atualizar exercício atual (se estiver na página do exercício)
+      if (currentExercise && currentExercise._id === updatedExercise._id) {
+        currentExercise = updatedExercise;
+        refreshExerciseUI();
+      }
+
+      // Se estiver na página "Meus exercícios", atualizar a lista
+      if (typeof renderMyExercises === "function" && window.myExercises) {
+        const exerciseIndex = window.myExercises.findIndex(ex => ex._id === updatedExercise._id);
+        if (exerciseIndex !== undefined && exerciseIndex >= 0) {
+          window.myExercises[exerciseIndex] = updatedExercise;
+          renderMyExercises();
+        }
+      }
 
       formMessageEl.textContent = "Exercício atualizado com sucesso!";
       formMessageEl.className = "form-message success";

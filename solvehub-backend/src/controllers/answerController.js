@@ -158,6 +158,9 @@ const createAnswerHandler = async (req, res) => {
           );
         }
       }
+      
+      // Emitir evento para atualizar comentários em tempo real
+      io.to(`exercise:${exerciseId}`).emit("comment:created", { exerciseId });
     }
 
     res.status(201).json(answer);
@@ -277,6 +280,16 @@ exports.toggleLike = async (req, res) => {
     answerObj.hasLiked = answer.likes.some(id => id.toString() === userId.toString());
     answerObj.hasDisliked = answer.dislikes.some(id => id.toString() === userId.toString());
 
+    // Emitir evento para atualizar votos em tempo real
+    const io = req.app.get("io");
+    if (io && answer.exercise) {
+      const exerciseId = answer.exercise.toString();
+      io.to(`exercise:${exerciseId}`).emit("comment:votesUpdated", { 
+        exerciseId, 
+        commentId: answerId 
+      });
+    }
+
     res.json(answerObj);
   } catch (err) {
     console.error('Erro toggleLike:', err);
@@ -315,6 +328,16 @@ exports.toggleDislike = async (req, res) => {
     answerObj.dislikesCount = answer.dislikes.length;
     answerObj.hasLiked = answer.likes.some(id => id.toString() === userId.toString());
     answerObj.hasDisliked = answer.dislikes.some(id => id.toString() === userId.toString());
+
+    // Emitir evento para atualizar votos em tempo real
+    const io = req.app.get("io");
+    if (io && answer.exercise) {
+      const exerciseId = answer.exercise.toString();
+      io.to(`exercise:${exerciseId}`).emit("comment:votesUpdated", { 
+        exerciseId, 
+        commentId: answerId 
+      });
+    }
 
     res.json(answerObj);
   } catch (err) {

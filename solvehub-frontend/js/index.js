@@ -23,11 +23,58 @@ async function loadLoggedUser() {
 
     // Avatar (imagem ou iniciais)
     updateAvatarDisplay(user);
+
+    // Mostrar link Admin se for admin
+    showAdminLink(user);
+    // Também chamar a função global centralizada (com pequeno delay para garantir DOM)
+    setTimeout(() => {
+        if (window.showAdminLinkIfAuthorized) {
+            window.showAdminLinkIfAuthorized();
+        }
+    }, 100);
   } catch (err) {
     console.error("Erro ao carregar utilizador:", err);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     window.location.href = "auth.html";
+  }
+}
+
+// ===============================
+//  SHOW ADMIN LINK
+// ===============================
+function showAdminLink(user) {
+  const role = (user.role || "").toUpperCase();
+  if (role === "ADMIN") {
+    // Verificar se o item já existe no HTML
+    let adminMenuItem = document.getElementById("adminMenuItem");
+    
+    if (adminMenuItem) {
+      // Se existe, apenas mostrar
+      adminMenuItem.style.display = "flex";
+    } else {
+      // Se não existe, criar
+      const menu = document.querySelector(".menu");
+      if (menu) {
+        adminMenuItem = document.createElement("a");
+        adminMenuItem.id = "adminMenuItem";
+        adminMenuItem.className = "menu-item";
+        adminMenuItem.href = "admin.html";
+        adminMenuItem.innerHTML = `
+          <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+            <path stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          Admin
+        `;
+        menu.appendChild(adminMenuItem);
+      }
+    }
+  } else {
+    // Se não tem permissão, esconder o item se existir
+    const adminMenuItem = document.getElementById("adminMenuItem");
+    if (adminMenuItem) {
+      adminMenuItem.style.display = "none";
+    }
   }
 }
 
@@ -207,14 +254,27 @@ function renderExercises(exercises) {
                   ${ex.attachments
                     .slice(0, 1)
                     .map(
-                      (att) => `
-                        <img
-                          src="http://localhost:5050${att.url}"
-                          alt="${att.filename}"
-                          class="attachment-thumb"
-                          loading="lazy"
-                        >
-                      `
+                      (att) => {
+                        if (att.type === 'image') {
+                          return `
+                            <img
+                              src="http://localhost:5050${att.url}"
+                              alt="${att.filename}"
+                              class="attachment-thumb"
+                              loading="lazy"
+                            >
+                          `;
+                        } else {
+                          return `
+                            <div class="attachment-thumb-file">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                              </svg>
+                            </div>
+                          `;
+                        }
+                      }
                     )
                     .join("")}
                   ${
@@ -317,7 +377,7 @@ function sortExercises(type) {
     case "recent":
       sorted.sort(
         (a, b) =>
-          new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+          new Date(b.createdAt) - new Date(a.createdAt)
       );
       break;
     case "popular":
@@ -406,16 +466,160 @@ if (searchInput) {
 }
 
 // ===============================
+//  LOAD SUBJECTS (Sidebar)
+// ===============================
+async function loadSubjectsInSidebar() {
+  const container = document.getElementById("subjectTagsContainer");
+  if (!container) return;
+
+  try {
+    // Carregar apenas disciplinas populares para o sidemenu
+    const popularSubjects = await apiGet("/subjects?popular=true");
+    console.log("Disciplinas populares carregadas para sidemenu:", popularSubjects);
+    
+    if (window.renderSubjectTags) {
+      window.renderSubjectTags(container, popularSubjects, (subjectId, subjectName) => {
+        console.log("Disciplina clicada:", subjectName, subjectId);
+        // Filtrar exercícios por disciplina
+        const filtered = allExercises.filter((ex) => {
+          const exSubjectId = ex.subjectId?._id || ex.subjectId;
+          const exSubjectName = ex.subject?.name || ex.subject || "";
+          return (exSubjectId && exSubjectId.toString() === subjectId.toString()) ||
+                 exSubjectName.toLowerCase() === subjectName.toLowerCase();
+        });
+        
+        // Toggle active em todas as tags do sidemenu
+        const tag = container.querySelector(`[data-subject-id="${subjectId}"]`);
+        const isActive = tag?.classList.contains("active");
+        
+        // Remover active de todas as tags (sidemenu e outras)
+        document.querySelectorAll(".tag").forEach(t => t.classList.remove("active"));
+        
+        if (!isActive && tag) {
+          // Selecionar a tag clicada
+          tag.classList.add("active");
+          currentFilter = { type: "subject", value: subjectName, subjectId };
+          
+          // Mostrar filtro ativo no topo
+          const filterChips = document.getElementById("activeFilters");
+          if (filterChips) {
+            filterChips.innerHTML = `
+              <div class="filter-chip">
+                <span>Disciplina: ${subjectName}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="clearFilters()">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </div>
+            `;
+          }
+          
+          // Renderizar exercícios filtrados
+          renderExercises(filtered);
+        } else {
+          // Deselecionar - mostrar todos
+          currentFilter = null;
+          const filterChips = document.getElementById("activeFilters");
+          if (filterChips) {
+            filterChips.innerHTML = "";
+          }
+          renderExercises(allExercises);
+        }
+      });
+    } else {
+      // Fallback se renderSubjectTags não estiver disponível - criar tags manualmente
+      if (popularSubjects && popularSubjects.length > 0) {
+        container.innerHTML = popularSubjects.map(subject => {
+          const subjectId = subject._id || subject.id;
+          const subjectName = escapeHtml(subject.name);
+          return `
+            <span class="tag" data-subject-id="${subjectId}" data-subject="${subjectName}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+              ${subjectName}
+            </span>
+          `;
+        }).join("");
+        
+        // Adicionar event listeners para as tags criadas manualmente
+        container.querySelectorAll(".tag").forEach(tag => {
+          tag.style.cursor = "pointer"; // Adicionar cursor pointer
+          tag.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const subjectId = tag.dataset.subjectId;
+            const subjectName = tag.dataset.subject;
+            
+            if (!subjectId && !subjectName) return;
+            
+            // Filtrar exercícios por disciplina
+            const filtered = allExercises.filter((ex) => {
+              const exSubjectId = ex.subjectId?._id || ex.subjectId;
+              const exSubjectName = ex.subject?.name || ex.subject || "";
+              return (exSubjectId && exSubjectId.toString() === subjectId.toString()) ||
+                     exSubjectName.toLowerCase() === subjectName.toLowerCase();
+            });
+            
+            // Toggle active
+            const isActive = tag.classList.contains("active");
+            
+            // Remover active de todas as tags (sidemenu e outras)
+            document.querySelectorAll(".tag").forEach(t => t.classList.remove("active"));
+            
+            if (!isActive) {
+              // Selecionar a tag clicada
+              tag.classList.add("active");
+              currentFilter = { type: "subject", value: subjectName, subjectId };
+              
+              // Mostrar filtro ativo no topo
+              const filterChips = document.getElementById("activeFilters");
+              if (filterChips) {
+                filterChips.innerHTML = `
+                  <div class="filter-chip">
+                    <span>Disciplina: ${subjectName}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="clearFilters()">
+                      <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                  </div>
+                `;
+              }
+              
+              // Renderizar exercícios filtrados
+              renderExercises(filtered);
+            } else {
+              // Deselecionar - mostrar todos
+              currentFilter = null;
+              const filterChips = document.getElementById("activeFilters");
+              if (filterChips) {
+                filterChips.innerHTML = "";
+              }
+              renderExercises(allExercises);
+            }
+          });
+        });
+      } else {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Nenhuma disciplina disponível</p>';
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao carregar disciplinas:", error);
+    container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Erro ao carregar disciplinas</p>';
+  }
+}
+
+// ===============================
 //  SUBJECT FILTER
 // ===============================
 function setupSubjectFilters() {
   // Usar event delegation para funcionar com elementos dinâmicos
   document.addEventListener("click", (e) => {
-    const tag = e.target.closest(".tag[data-subject]");
+    const tag = e.target.closest(".tag[data-subject], .tag[data-subject-id]");
     if (!tag) return;
     
+    const subjectId = tag.dataset.subjectId;
     const subject = tag.dataset.subject;
-    if (!subject) return;
+    if (!subject && !subjectId) return;
 
     // Verificar se já está selecionado (toggle)
     const isActive = tag.classList.contains("active");
@@ -450,30 +654,23 @@ function setupSubjectFilters() {
       }
     }
 
-    // Mapear abreviações para nomes completos
-    const subjectMap = {
-      "BD": "Base de Dados",
-      "SIR": "Sistemas",
-      "POO": "Programação"
-    };
-    
-    const fullSubjectName = subjectMap[subject] || subject;
+    // Filtrar por subjectId ou subject name
+    const filtered = allExercises.filter((ex) => {
+      if (subjectId) {
+        const exSubjectId = ex.subjectId?._id || ex.subjectId;
+        return exSubjectId && exSubjectId.toString() === subjectId.toString();
+      } else if (subject) {
+        const exSubjectName = ex.subject?.name || ex.subject || "";
+        return exSubjectName.toLowerCase() === subject.toLowerCase();
+      }
+      return false;
+    });
     
     // Aplicar filtro e ordenação
-    // A função sortExercises já considera o currentFilter, então basta chamá-la
     if (currentSort) {
       sortExercises(currentSort);
-    } else if (currentFilter) {
-      // Se não há ordenação mas há filtro, apenas filtrar
-      const filtered = allExercises.filter((ex) => {
-        const exSubject = (ex.subject || "").toLowerCase();
-        return exSubject.includes(subject.toLowerCase()) || 
-               exSubject.includes(fullSubjectName.toLowerCase());
-      });
-      renderExercises(filtered);
     } else {
-      // Sem filtro nem ordenação, mostrar todos
-      renderExercises(allExercises);
+      renderExercises(filtered);
     }
   });
 }
@@ -569,6 +766,16 @@ function timeAgo(dateString) {
 }
 
 // ===============================
+//  ESCAPE HTML
+// ===============================
+function escapeHtml(text) {
+  if (!text) return "";
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===============================
 //  PROFILE DROPDOWN TOGGLE
 // ===============================
 const profile = document.querySelector(".profile");
@@ -606,7 +813,19 @@ if (logoutBtn) {
 // ===============================
 async function initApp() {
   await loadLoggedUser();
-  await loadExercises();
+  
+  // Garantir que o menu admin aparece após carregar o utilizador
+  setTimeout(() => {
+    if (window.showAdminLinkIfAuthorized) {
+      window.showAdminLinkIfAuthorized();
+    }
+  }, 200);
+  
+  // Carregar subjects e exercícios em paralelo
+  await Promise.all([
+    loadSubjectsInSidebar(),
+    loadExercises()
+  ]);
   
   // Configurar dropdown de ordenação (usar setTimeout para garantir que o DOM está pronto)
   setTimeout(() => {

@@ -24,13 +24,14 @@
     padding: 10px 12px;
     border-radius: 10px;
     cursor: pointer;
-    color: #475569;
+    color: var(--text-muted);
     transition: all 0.2s ease;
     text-decoration: none;
 }
 
 .menu-item:hover {
-    background: #f3f6ff;
+    background: var(--primary-soft);
+    color: var(--text);
 }
 
 .menu-item.active {
@@ -43,7 +44,7 @@
     width: 18px;
     height: 18px;
     stroke-width: 2;
-    stroke: #475569;
+    stroke: currentColor;
 }
 
 .menu-item.active svg.icon {
@@ -70,7 +71,7 @@
 }
 
 .profile:hover {
-    background: #f8fafc;
+    background: var(--surface-2);
 }
 
 .profile-name {
@@ -109,11 +110,11 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    background: var(--bg-white);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
     min-width: 200px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow);
     overflow: hidden;
     z-index: 1000;
     opacity: 1;
@@ -135,7 +136,7 @@
     font-size: 14px;
     transition: all 0.15s ease;
     text-decoration: none;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border);
 }
 
 .dropdown-item:last-child {
@@ -143,7 +144,7 @@
 }
 
 .dropdown-item:hover {
-    background: #f3f6ff;
+    background: var(--primary-soft);
     padding-left: 20px;
 }
 
@@ -180,7 +181,7 @@
 
 #notificationsDropdown {
     width: 320px;
-    max-height: 500px;
+    max-height: 360px; /* Header (~60px) + 4 itens (~280px) */
     padding: 0;
     overflow: hidden;
     display: flex;
@@ -215,12 +216,30 @@
 }
 
 .mark-all-read-btn:hover {
-    background: #f3f6ff;
+    background: var(--primary-soft);
 }
 
 .notifications-list {
-    max-height: 400px;
+    max-height: 280px; /* Altura para mostrar aproximadamente 4 itens */
     overflow-y: auto;
+}
+
+/* Scrollbar das notificações no tema escuro */
+[data-theme="dark"] .notifications-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+[data-theme="dark"] .notifications-list::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+[data-theme="dark"] .notifications-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .notifications-list::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
 
 .notification-item {
@@ -228,7 +247,7 @@
     align-items: flex-start;
     padding: 12px 16px;
     cursor: pointer;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s ease;
     position: relative;
 }
@@ -238,15 +257,16 @@
 }
 
 .notification-item:hover {
-    background: #f8fafc;
+    background: var(--primary-soft);
 }
 
 .notification-item.unread {
-    background: #f0f9ff;
+    background: var(--primary-soft);
 }
 
 .notification-item.unread:hover {
-    background: #e0f2fe;
+    background: var(--primary-soft);
+    opacity: 0.9;
 }
 
 .notification-content {
@@ -302,8 +322,8 @@
 }
 
 .tag {
-    background: #eef2ff;
-    color: #4338ca;
+    background: var(--primary-soft);
+    color: var(--primary);
     padding: 4px 10px;
     border-radius: 999px;
     font-size: 12px;
@@ -317,7 +337,8 @@
 }
 
 .tag:hover {
-    background: #dbeafe;
+    background: var(--primary-soft);
+    opacity: 0.9;
     transform: translateY(-1px);
 }
 
@@ -364,7 +385,7 @@
     padding: 10px 16px;
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: var(--bg-white);
+    background: var(--surface);
     color: var(--text);
     cursor: pointer;
     font-weight: 500;
@@ -373,7 +394,7 @@
 }
 
 .btn-outline:hover {
-    background: #f8fafc;
+    background: var(--surface-2);
     border-color: var(--primary);
     color: var(--primary);
     transform: translateY(-1px);

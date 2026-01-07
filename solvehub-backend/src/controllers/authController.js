@@ -1,4 +1,6 @@
 const User = require("../models/User");
+const Exercise = require("../models/Exercise");
+const Answer = require("../models/Answer");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -20,6 +22,7 @@ exports.register = async (req, res) => {
       username,
       email,
       password: hash,
+      role: "ALUNO", // Todos os novos utilizadores são alunos por padrão
     });
 
     await newUser.save();
@@ -170,5 +173,110 @@ exports.changePassword = async (req, res) => {
   } catch (error) {
     console.error("Erro ao alterar palavra-passe:", error);
     res.status(500).json({ message: "Erro ao alterar palavra-passe" });
+  }
+};
+
+// ===============================
+// GET SAVED EXERCISES
+// ===============================
+exports.getSavedExercises = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate({
+      path: "savedExercises",
+      populate: {
+        path: "author",
+        select: "username avatar"
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilizador não encontrado" });
+    }
+
+    // Adicionar contagem de respostas e votes para cada exercício
+    const exercisesWithCounts = await Promise.all(
+      user.savedExercises.map(async (ex) => {
+        const answersCount = await Answer.countDocuments({ exercise: ex._id });
+        const votes = (ex.likes?.length || 0) - (ex.dislikes?.length || 0);
+        return {
+          ...ex.toObject(),
+          answersCount,
+          votes
+        };
+      })
+    );
+
+    res.json(exercisesWithCounts);
+  } catch (error) {
+    console.error("Erro ao carregar exercícios guardados:", error);
+    res.status(500).json({ message: "Erro ao carregar exercícios guardados" });
+  }
+};
+
+// ===============================
+// GET NOTIFICATION SETTINGS
+// ===============================
+exports.getNotificationSettings = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("notificationSettings");
+    
+    if (!user) {
+      return res.status(404).json({ message: "Utilizador não encontrado" });
+    }
+
+    // Retornar com defaults se não existir
+    const settings = user.notificationSettings || {
+      exerciseReplies: true,
+      commentReplies: true,
+      exerciseLikes: false
+    };
+
+    res.json(settings);
+  } catch (error) {
+    console.error("Erro ao carregar preferências de notificações:", error);
+    res.status(500).json({ message: "Erro ao carregar preferências de notificações" });
+  }
+};
+
+// ===============================
+// UPDATE NOTIFICATION SETTINGS
+// ===============================
+exports.updateNotificationSettings = async (req, res) => {
+  try {
+    const { exerciseReplies, commentReplies, exerciseLikes } = req.body;
+
+    // Validar tipos (se vier undefined, manter valor atual)
+    const update = {};
+    if (typeof exerciseReplies === 'boolean') {
+      update['notificationSettings.exerciseReplies'] = exerciseReplies;
+    }
+    if (typeof commentReplies === 'boolean') {
+      update['notificationSettings.commentReplies'] = commentReplies;
+    }
+    if (typeof exerciseLikes === 'boolean') {
+      update['notificationSettings.exerciseLikes'] = exerciseLikes;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: update },
+      { new: true, runValidators: true }
+    ).select("notificationSettings");
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilizador não encontrado" });
+    }
+
+    // Retornar com defaults se não existir
+    const settings = user.notificationSettings || {
+      exerciseReplies: true,
+      commentReplies: true,
+      exerciseLikes: false
+    };
+
+    res.json(settings);
+  } catch (error) {
+    console.error("Erro ao atualizar preferências de notificações:", error);
+    res.status(500).json({ message: "Erro ao atualizar preferências de notificações" });
   }
 };

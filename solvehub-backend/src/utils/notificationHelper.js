@@ -1,10 +1,11 @@
 const Notification = require("../models/Notification");
+const User = require("../models/User");
 
 /**
- * Cria uma notificação e emite via socket
+ * Cria uma notificação e emite via socket (com verificação de preferências)
  * @param {Object} io - Instância do Socket.IO
  * @param {String} userId - ID do destinatário
- * @param {String} type - Tipo: 'comment', 'reply', 'like'
+ * @param {String} type - Tipo: 'comment', 'reply', 'like', 'exercise_like'
  * @param {String} message - Mensagem da notificação
  * @param {String} link - Link para navegar (ex: '/exercise.html?id=...')
  * @param {String} relatedExerciseId - ID do exercício relacionado (opcional)
@@ -20,6 +21,35 @@ async function createNotification(
   relatedAnswerId = null
 ) {
   try {
+    // Verificar preferências do utilizador
+    const user = await User.findById(userId).select("notificationSettings");
+    if (!user) {
+      console.error("Utilizador não encontrado para notificação:", userId);
+      return null;
+    }
+
+    // Verificar se a notificação está permitida pelas preferências
+    const settings = user.notificationSettings || {
+      exerciseReplies: true,
+      commentReplies: true,
+      exerciseLikes: false
+    };
+
+    let shouldNotify = true;
+
+    if (type === "comment" && !settings.exerciseReplies) {
+      shouldNotify = false;
+    } else if (type === "reply" && !settings.commentReplies) {
+      shouldNotify = false;
+    } else if (type === "exercise_like" && !settings.exerciseLikes) {
+      shouldNotify = false;
+    }
+
+    if (!shouldNotify) {
+      // Não criar notificação se a preferência estiver desativada
+      return null;
+    }
+
     const notification = new Notification({
       userId,
       type,

@@ -8,7 +8,10 @@ const {
   getMe,
   updateMe,
   uploadAvatar,
-  changePassword
+  changePassword,
+  getSavedExercises,
+  getNotificationSettings,
+  updateNotificationSettings
 } = require("../controllers/authController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -42,5 +45,8 @@ router.get("/me", authMiddleware, getMe);
 router.put("/me", authMiddleware, updateMe);
 router.post("/me/avatar", authMiddleware, upload.single("avatar"), uploadAvatar);
 router.put("/password", authMiddleware, changePassword);
+router.get("/me/saved", authMiddleware, getSavedExercises);
+router.get("/me/notification-settings", authMiddleware, getNotificationSettings);
+router.put("/me/notification-settings", authMiddleware, updateNotificationSettings);
 
 module.exports = router;

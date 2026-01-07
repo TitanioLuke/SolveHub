@@ -23,7 +23,7 @@
     min-height: 40px;
     border-radius: 10px;
     border: 1px solid var(--border);
-    background: white;
+    background: var(--bg-white);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -42,7 +42,7 @@
 }
 
 .icon-btn:hover {
-    background: #f8fafc;
+    background: var(--primary-soft);
     border-color: var(--primary);
 }
 
@@ -105,11 +105,11 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    background: white;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
     min-width: 200px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     overflow: hidden;
     z-index: 1000;
     opacity: 1;
@@ -128,7 +128,7 @@
     color: var(--text);
     cursor: pointer;
     transition: all 0.15s ease;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border);
 }
 
 .dropdown-menu-item:last-child {
@@ -136,7 +136,7 @@
 }
 
 .dropdown-menu-item:hover {
-    background: #f8fafc;
+    background: var(--surface-2);
     padding-left: 20px;
 }
 
@@ -156,7 +156,7 @@
 .search-box-main {
     display: flex;
     align-items: center;
-    background: white;
+    background: var(--surface);
     border: 2px solid var(--border);
     padding: 14px 18px;
     border-radius: 12px;
@@ -189,7 +189,7 @@
 }
 
 .search-clear {
-    background: #f1f5f9;
+    background: var(--bg);
     border: none;
     width: 28px;
     height: 28px;
@@ -202,7 +202,7 @@
 }
 
 .search-clear:hover {
-    background: #e2e8f0;
+    background: var(--border);
 }
 
 .filter-chips {
@@ -227,7 +227,8 @@
 }
 
 .filter-chip:hover {
-    background: #dbeafe;
+    background: var(--primary-soft);
+    opacity: 0.9;
 }
 
 .filter-chip svg {
@@ -246,7 +247,7 @@
 }
 
 .stat-card {
-    background: white;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
@@ -301,7 +302,7 @@
 .empty-state {
     padding: 80px 32px;
     text-align: center;
-    background: white;
+    background: var(--surface);
     border-radius: 16px;
     border: 2px dashed var(--border);
     margin-top: 40px;
@@ -313,7 +314,7 @@
     justify-content: center;
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, #f1f5fb 0%, #e5e7eb 100%);
+    background: linear-gradient(135deg, var(--bg) 0%, var(--border) 100%);
     border-radius: 20px;
     margin: 0 auto 24px;
 }

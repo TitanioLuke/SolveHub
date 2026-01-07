@@ -4,7 +4,9 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "seed:subjects": "node scripts/seedSubjects.js",
+    "migrate:exercises": "node scripts/migrateExercises.js"
   },
   "keywords": [],
   "author": "",

@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="./assets/css/components.css">
     <link rel="stylesheet" href="./assets/css/utilities.css">
     <link rel="stylesheet" href="./assets/css/settings.css">
+
+    <!-- Theme System (carregar primeiro para evitar flash) -->
+    <script src="./js/theme.js" defer></script>
 </head>
 <body>
 
@@ -44,18 +47,24 @@
                 Explorar
             </a>
 
-            <a class="menu-item" href="#">
+            <a class="menu-item" href="my-exercises.html">
                 <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
                     <path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Meus exercícios
             </a>
 
-            <a class="menu-item" href="#">
+            <a class="menu-item" href="saved.html">
                 <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
                     <path stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
                 </svg>
                 Guardados
+            </a>
+            <a class="menu-item" href="admin.html" id="adminMenuItem" style="display: none;">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Admin
             </a>
         </nav>
 
@@ -293,10 +302,10 @@
                         <div class="setting-item">
                             <div class="setting-info">
                                 <h4>Novas respostas</h4>
-                                <p>Recebe notificações quando alguém responde aos teus exercícios</p>
+                                <p>Notificar quando alguém responde a um exercício criado por ti</p>
                             </div>
                             <label class="toggle">
-                                <input type="checkbox" checked>
+                                <input type="checkbox" id="toggleExerciseReplies" data-setting="exerciseReplies">
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -304,21 +313,21 @@
                         <div class="setting-item">
                             <div class="setting-info">
                                 <h4>Comentários</h4>
-                                <p>Recebe notificações de novos comentários</p>
+                                <p>Notificar quando alguém responde a um comentário/resposta teu</p>
                             </div>
                             <label class="toggle">
-                                <input type="checkbox" checked>
+                                <input type="checkbox" id="toggleCommentReplies" data-setting="commentReplies">
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
 
                         <div class="setting-item">
                             <div class="setting-info">
-                                <h4>Votos</h4>
-                                <p>Recebe notificações quando alguém vota nas tuas respostas</p>
+                                <h4>Likes nos meus exercícios</h4>
+                                <p>Notificar quando alguém dá like num exercício criado por ti</p>
                             </div>
                             <label class="toggle">
-                                <input type="checkbox">
+                                <input type="checkbox" id="toggleExerciseLikes" data-setting="exerciseLikes">
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -354,17 +363,6 @@
                                     </svg>
                                 </div>
                                 <span>Escuro</span>
-                            </label>
-
-                            <label class="theme-option">
-                                <input type="radio" name="theme" value="auto">
-                                <div class="theme-preview auto">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="2" y="3" width="20" height="14" rx="2"/>
-                                        <path d="M8 21h8M12 17v4"/>
-                                    </svg>
-                                </div>
-                                <span>Automático</span>
                             </label>
                         </div>
                     </div>

@@ -37,9 +37,12 @@ app.use(
 // ROTAS
 // ===============================
 app.use("/auth", require("./routes/authRoutes"));
+app.use("/subjects", require("./routes/subjectRoutes")); // Endpoint público para subjects
 app.use("/exercises", require("./routes/exerciseRoutes"));
 app.use("/answers", require("./routes/answerRoutes"));
 app.use("/notifications", require("./routes/notificationRoutes"));
+app.use("/admin", require("./routes/adminRoutes"));
+app.use("/reports", require("./routes/reportRoutes"));
 
 // ===============================
 // TESTE

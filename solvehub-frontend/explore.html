@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Explorar - SolveHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS modular -->
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/layout.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/exercises.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+    <link rel="stylesheet" href="./assets/css/index.css">
+    <link rel="stylesheet" href="./assets/css/explore.css">
+
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            Solve<span>Hub</span>
+        </div>
+
+        <nav class="menu">
+            <p class="menu-title">Menu Principal</p>
+
+            <a class="menu-item" href="index.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Início
+            </a>
+
+            <a class="menu-item active" href="explore.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Explorar
+            </a>
+
+            <a class="menu-item" href="my-exercises.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Meus exercícios
+            </a>
+
+            <a class="menu-item" href="saved.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                </svg>
+                Guardados
+            </a>
+            <a class="menu-item" href="admin.html" id="adminMenuItem" style="display: none;">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Admin
+            </a>
+        </nav>
+
+        <nav class="menu">
+            <a class="menu-item" href="settings.html">
+                <svg class="icon" stroke="currentColor" viewBox="0 0 24 24" fill="none">
+                    <path stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Definições
+            </a>
+        </nav>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div></div>
+
+            <div class="topbar-actions">
+                <div class="notifications-wrapper">
+                    <button class="icon-btn" title="Notificações">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown hidden" id="notificationsDropdown"></div>
+                </div>
+
+                <div class="profile">
+                    <span class="profile-name"></span>
+                    <div class="avatar"></div>      
+
+                    <div class="dropdown hidden" id="profileMenu">
+                        <a class="dropdown-item" href="settings.html">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Perfil
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item logout">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9"/>
+                            </svg>
+                            Terminar sessão
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- HEADER -->
+        <section class="page-header">
+            <div>
+                <h1>Explorar Disciplinas</h1>
+                <p>Descobre exercícios organizados por área de conhecimento</p>
+            </div>
+        </section>
+
+        <!-- SEARCH BAR -->
+        <div class="filters-advanced">
+            <div class="search-box-main">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" id="exploreSearchInput" placeholder="Pesquisar por disciplina ou título de exercício...">
+                <button class="search-clear hidden" id="clearExploreSearch">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- SUBJECTS GRID -->
+        <div class="subjects-grid" id="subjectsGrid">
+            <!-- Cards serão renderizados via JS -->
+        </div>
+
+        <!-- EXERCISES LIST (quando uma disciplina é selecionada) -->
+        <div class="exercises-list-container hidden" id="exercisesListContainer">
+            <div class="exercises-list-header">
+                <button class="btn-outline" id="backToSubjects">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span>Voltar</span>
+                </button>
+                <h2 id="selectedSubjectTitle"></h2>
+            </div>
+            <div class="exercise-list" id="exercisesList">
+                <!-- Exercícios serão renderizados via JS -->
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="./js/api.js"></script>
+<script src="./js/subjects.js"></script>
+<script src="./js/explore.js"></script>
+<script src="./js/script.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+    // Inicializar notificações após carregar utilizador
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            await loadLoggedUser();
+            setTimeout(() => {
+                initNotifications();
+            }, 100);
+        } catch (err) {
+            console.log("Utilizador não autenticado, notificações não inicializadas");
+        }
+    });
+</script>
+
+</body>
+</html>
+

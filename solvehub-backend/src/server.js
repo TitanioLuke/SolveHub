@@ -53,6 +53,24 @@ io.on("connection", (socket) => {
   // Associar utilizador a uma room
   socket.join(`user:${socket.userId}`);
 
+  // Evento para juntar-se a uma room de exercício
+  socket.on("joinExercise", (data) => {
+    const { exerciseId } = data;
+    if (exerciseId) {
+      socket.join(`exercise:${exerciseId}`);
+      console.log(`Utilizador ${socket.userId} juntou-se ao exercício ${exerciseId}`);
+    }
+  });
+
+  // Evento para sair de uma room de exercício
+  socket.on("leaveExercise", (data) => {
+    const { exerciseId } = data;
+    if (exerciseId) {
+      socket.leave(`exercise:${exerciseId}`);
+      console.log(`Utilizador ${socket.userId} saiu do exercício ${exerciseId}`);
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log(`Utilizador desconectado: ${socket.userId}`);
   });
