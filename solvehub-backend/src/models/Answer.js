@@ -24,8 +24,11 @@ const AnswerSchema = new mongoose.Schema(
     attachments: [
       {
         url: { type: String, required: true },
+        publicId: { type: String, default: null }, // null para anexos antigos locais
         type: { type: String, enum: ['image', 'pdf'], required: true },
-        filename: { type: String, required: true }
+        filename: { type: String, required: true },
+        size: { type: Number, default: null }, // tamanho em bytes
+        createdAt: { type: Date, default: Date.now }
       }
     ],
     likes: [

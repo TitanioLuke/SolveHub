@@ -4,6 +4,7 @@ const Report = require("../models/Report");
 const User = require("../models/User");
 const Exercise = require("../models/Exercise");
 const Answer = require("../models/Answer");
+const { deleteAttachments } = require("../utils/cloudinaryUpload");
 
 // ===============================
 // SUBJECTS
@@ -439,6 +440,19 @@ exports.deleteExercise = async (req, res) => {
       return res.status(404).json({ message: "Exercício não encontrado." });
     }
 
+    // Apagar anexos do exercício (Cloudinary + ficheiros locais)
+    if (exercise.attachments && exercise.attachments.length > 0) {
+      await deleteAttachments(exercise.attachments);
+    }
+
+    // Buscar todas as respostas do exercício para apagar seus anexos
+    const answers = await Answer.find({ exercise: id });
+    for (const answer of answers) {
+      if (answer.attachments && answer.attachments.length > 0) {
+        await deleteAttachments(answer.attachments);
+      }
+    }
+
     // Remover respostas relacionadas
     await Answer.deleteMany({ exercise: id });
 
@@ -459,6 +473,11 @@ exports.deleteAnswer = async (req, res) => {
     const answer = await Answer.findById(id);
     if (!answer) {
       return res.status(404).json({ message: "Comentário não encontrado." });
+    }
+
+    // Apagar anexos da resposta (Cloudinary + ficheiros locais)
+    if (answer.attachments && answer.attachments.length > 0) {
+      await deleteAttachments(answer.attachments);
     }
 
     await Answer.findByIdAndDelete(id);

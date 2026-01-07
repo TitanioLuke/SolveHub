@@ -3,64 +3,48 @@ const Answer = require("../models/Answer");
 const User = require("../models/User");
 const Subject = require("../models/Subject");
 const { createNotification } = require("../utils/notificationHelper");
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const uploadAttachments = require("../middleware/uploadAttachments");
+const {
+  uploadBufferToCloudinary,
+  deleteAttachment,
+  deleteAttachments,
+} = require("../utils/cloudinaryUpload");
 
-// ==============================
-// MULTER CONFIG (UPLOAD FOTOS)
-// ==============================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let uploadPath;
-    
-    // SEPARA por tipo de ficheiro
-    if (file.mimetype.startsWith('image/')) {
-      uploadPath = path.join(__dirname, '../../uploads/exercises/images');
-    } else {
-      uploadPath = path.join(__dirname, '../../uploads/exercises/pdfs');
+// Middleware para tratar erros do multer
+const handleMulterError = (err, req, res, next) => {
+  if (err) {
+    console.error("❌ Erro do multer:", err);
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ message: "Ficheiro demasiado grande (máx 10MB)" });
     }
-    
-    // Cria pasta se não existir
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      return res.status(400).json({ message: "Demasiados ficheiros (máx 5)" });
     }
-    
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
+    return res.status(400).json({ message: err.message || "Erro ao processar ficheiro" });
   }
-});
-
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
-    if (file.size > 20 * 1024 * 1024) { // 20MB
-      return cb(new Error('Ficheiro demasiado grande (máx 20MB)'), false);
-    }
-    cb(null, true);
-  } else {
-    cb(new Error('Só imagens e PDFs permitidos'), false);
-  }
+  next();
 };
 
-const upload = multer({ 
-  storage, 
-  fileFilter,
-  limits: { fileSize: 20 * 1024 * 1024 } // 20MB máx
-});
-
 exports.createExercise = [
-  upload.array('attachments', 10), // máx 10 ficheiros
+  uploadAttachments.array("attachments", 5), // máx 5 ficheiros
+  handleMulterError,
   async (req, res) => {
     try {
+      console.log("📝 Criar exercício - Dados recebidos:");
+      console.log("   Body:", { title: req.body.title, subject: req.body.subject, subjectId: req.body.subjectId });
+      console.log("   Ficheiros:", req.files ? `${req.files.length} ficheiro(s)` : "nenhum");
+      if (req.files && req.files.length > 0) {
+        req.files.forEach((file, index) => {
+          console.log(`   Ficheiro ${index + 1}: ${file.originalname} (${file.mimetype}, ${file.size} bytes, buffer: ${file.buffer ? file.buffer.length + " bytes" : "null"})`);
+        });
+      }
+
       const { title, description, subject, subjectId, tags } = req.body;
-      
+
       // Validar subjectId se fornecido
       let finalSubjectId = null;
       let finalSubject = null;
-      
+
       if (subjectId) {
         const subjectDoc = await Subject.findById(subjectId);
         if (!subjectDoc) {
@@ -81,20 +65,49 @@ exports.createExercise = [
       } else {
         return res.status(400).json({ message: "Disciplina é obrigatória." });
       }
-      
-      // Processar ficheiros carregados
+
+      // Processar ficheiros carregados - upload para Cloudinary
       const attachments = [];
       if (req.files && req.files.length > 0) {
-        req.files.forEach(file => {
-          const folder = file.mimetype.startsWith('image/') ? 'images' : 'pdfs';
-            attachments.push({
-              url: `/uploads/exercises/${folder}/${file.filename}`,
-              type: file.mimetype.startsWith('image/') ? 'image' : 'pdf',
-              filename: file.originalname
+        console.log(`📤 Processando ${req.files.length} ficheiro(s) para Cloudinary...`);
+        try {
+          for (const file of req.files) {
+            console.log(`  → Fazendo upload: ${file.originalname} (${file.mimetype}, ${file.size} bytes)`);
+            
+            if (!file.buffer) {
+              console.error(`  ✗ Erro: Buffer vazio para ${file.originalname}`);
+              continue;
+            }
+
+            const uploadResult = await uploadBufferToCloudinary(file.buffer, {
+              filename: file.originalname,
             });
 
-        });
-      } 
+            console.log(`  ✓ Upload concluído: ${uploadResult.url}`);
+
+            // Inferir type
+            const type = file.mimetype.startsWith("image/") ? "image" : "pdf";
+
+            attachments.push({
+              url: uploadResult.url, // URL completo do Cloudinary
+              publicId: uploadResult.publicId,
+              type: type,
+              filename: uploadResult.originalFilename,
+              size: uploadResult.bytes,
+              createdAt: new Date(),
+            });
+          }
+          console.log(`✓ Total de ${attachments.length} anexo(s) processado(s)`);
+        } catch (uploadError) {
+          console.error("❌ Erro ao fazer upload para Cloudinary:", uploadError);
+          console.error("   Detalhes:", uploadError.message, uploadError.stack);
+          return res.status(500).json({
+            message: `Erro ao fazer upload dos anexos: ${uploadError.message || "Erro desconhecido"}`,
+          });
+        }
+      } else {
+        console.log("ℹ️  Nenhum ficheiro enviado");
+      }
 
       const exercise = new Exercise({
         title,
@@ -103,21 +116,20 @@ exports.createExercise = [
         subjectId: finalSubjectId,
         tags: tags ? JSON.parse(tags) : [],
         attachments,
-        author: req.user.id
+        author: req.user.id,
       });
 
       await exercise.save();
-      
+
       // Popular subject antes de retornar
       await exercise.populate("subjectId", "name slug");
-      
+
       res.status(201).json(exercise);
-      
     } catch (err) {
-      console.error('Erro createExercise:', err);
+      console.error("Erro createExercise:", err);
       res.status(400).json({ message: err.message });
     }
-  }
+  },
 ];
 
 exports.getExercises = async (req, res) => {
@@ -291,7 +303,8 @@ exports.toggleDislike = async (req, res) => {
 // ATUALIZAR EXERCÍCIO
 // ==============================
 exports.updateExercise = [
-  upload.array('attachments', 10),
+  uploadAttachments.array("attachments", 5),
+  handleMulterError,
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -305,13 +318,15 @@ exports.updateExercise = [
 
       // Verificar se o utilizador é o autor
       if (exercise.author.toString() !== userId.toString()) {
-        return res.status(403).json({ message: "Não tens permissão para editar este exercício" });
+        return res
+          .status(403)
+          .json({ message: "Não tens permissão para editar este exercício" });
       }
 
       // Atualizar campos
       if (title) exercise.title = title;
       if (description) exercise.description = description;
-      
+
       // Atualizar subjectId se fornecido
       if (subjectId) {
         const subjectDoc = await Subject.findById(subjectId);
@@ -330,43 +345,68 @@ exports.updateExercise = [
           exercise.subject = subject;
         }
       }
-      
+
       if (tags) exercise.tags = JSON.parse(tags);
 
       // Remover anexos se especificado
-      let removedAttachments = [];
+      let removedAttachmentsUrls = [];
       if (req.body.removedAttachments) {
         try {
-          removedAttachments = JSON.parse(req.body.removedAttachments);
+          removedAttachmentsUrls = JSON.parse(req.body.removedAttachments);
         } catch (e) {
           console.error("Erro ao parsear removedAttachments:", e);
         }
       }
 
-      // Filtrar anexos removidos
-      if (removedAttachments.length > 0) {
+      // Filtrar anexos removidos e apagar do Cloudinary/disco
+      if (removedAttachmentsUrls.length > 0) {
+        const attachmentsToRemove = (exercise.attachments || []).filter((att) =>
+          removedAttachmentsUrls.includes(att.url)
+        );
+
+        // Apagar anexos removidos (Cloudinary + ficheiros locais)
+        await deleteAttachments(attachmentsToRemove);
+
+        // Filtrar anexos removidos do array
         exercise.attachments = (exercise.attachments || []).filter(
-          att => !removedAttachments.includes(att.url)
+          (att) => !removedAttachmentsUrls.includes(att.url)
         );
       }
 
-      // Processar novos ficheiros se houver
+      // Processar novos ficheiros se houver - upload para Cloudinary
       if (req.files && req.files.length > 0) {
-        const newAttachments = req.files.map(file => {
-          const folder = file.mimetype.startsWith('image/') ? 'images' : 'pdfs';
-          return {
-            url: `/uploads/exercises/${folder}/${file.filename}`,
-            type: file.mimetype.startsWith('image/') ? 'image' : 'pdf',
-            filename: file.originalname
-          };
-        });
-        
-        // Adicionar aos anexos existentes
-        exercise.attachments = [...(exercise.attachments || []), ...newAttachments];
+        try {
+          const newAttachments = [];
+          for (const file of req.files) {
+            const uploadResult = await uploadBufferToCloudinary(file.buffer, {
+              filename: file.originalname,
+            });
+
+            // Inferir type
+            const type = file.mimetype.startsWith("image/") ? "image" : "pdf";
+
+            newAttachments.push({
+              url: uploadResult.url, // URL completo do Cloudinary
+              publicId: uploadResult.publicId,
+              type: type,
+              filename: uploadResult.originalFilename,
+              size: uploadResult.bytes,
+              createdAt: new Date(),
+            });
+          }
+
+          // Adicionar aos anexos existentes
+          exercise.attachments = [...(exercise.attachments || []), ...newAttachments];
+        } catch (uploadError) {
+          console.error("Erro ao fazer upload para Cloudinary:", uploadError);
+          return res.status(500).json({
+            message: "Erro ao fazer upload dos anexos. Tente novamente.",
+          });
+        }
       }
 
       await exercise.save();
-      
+
       // Popular campos para retornar
       await exercise.populate("author", "username avatar");
       await exercise.populate("subjectId", "name slug");
@@ -375,10 +415,10 @@ exports.updateExercise = [
 
       res.json(exercise);
     } catch (err) {
-      console.error('Erro updateExercise:', err);
+      console.error("Erro updateExercise:", err);
       res.status(400).json({ message: err.message || "Erro ao atualizar exercício" });
     }
-  }
+  },
 ];
 
 // ==============================
@@ -396,20 +436,33 @@ exports.deleteExercise = async (req, res) => {
 
     // Verificar se o utilizador é o autor
     if (exercise.author.toString() !== userId.toString()) {
-      return res.status(403).json({ message: "Não tens permissão para apagar este exercício" });
+      return res
+        .status(403)
+        .json({ message: "Não tens permissão para apagar este exercício" });
+    }
+
+    // Apagar anexos do exercício (Cloudinary + ficheiros locais)
+    if (exercise.attachments && exercise.attachments.length > 0) {
+      await deleteAttachments(exercise.attachments);
+    }
+
+    // Buscar todas as respostas do exercício para apagar seus anexos
+    const answers = await Answer.find({ exercise: id });
+    for (const answer of answers) {
+      if (answer.attachments && answer.attachments.length > 0) {
+        await deleteAttachments(answer.attachments);
+      }
     }
 
     // Apagar respostas associadas
     await Answer.deleteMany({ exercise: id });
 
-    // Apagar ficheiros físicos (opcional - pode ser feito em background)
-    // Por agora, apenas apagar o documento
-
+    // Apagar o exercício
     await Exercise.findByIdAndDelete(id);
 
     res.status(204).send();
   } catch (err) {
-    console.error('Erro deleteExercise:', err);
+    console.error("Erro deleteExercise:", err);
     res.status(500).json({ message: "Erro ao apagar exercício" });
   }
 };

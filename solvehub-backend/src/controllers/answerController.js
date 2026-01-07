@@ -1,57 +1,18 @@
 const Answer = require("../models/Answer");
 const Exercise = require("../models/Exercise");
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const { createNotification } = require("../utils/notificationHelper");
-
-// ==============================
-// MULTER CONFIG (UPLOAD FOTOS PARA RESPOSTAS)
-// ==============================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let uploadPath;
-    
-    if (file.mimetype.startsWith('image/')) {
-      uploadPath = path.join(__dirname, '../../uploads/answers/images');
-    } else {
-      uploadPath = path.join(__dirname, '../../uploads/answers/pdfs');
-    }
-    
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
-    cb(null, true);
-  } else {
-    cb(new Error('Só imagens e PDFs permitidos'), false);
-  }
-};
-
-const upload = multer({ 
-  storage, 
-  fileFilter,
-  limits: { fileSize: 20 * 1024 * 1024 }
-});
+const uploadAttachments = require("../middleware/uploadAttachments");
+const { uploadBufferToCloudinary, deleteAttachments } = require("../utils/cloudinaryUpload");
 
 // Middleware para tratar erros do multer
 const handleMulterError = (err, req, res, next) => {
+  const multer = require("multer");
   if (err instanceof multer.MulterError) {
-    if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ message: 'Ficheiro demasiado grande (máx 20MB)' });
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ message: "Ficheiro demasiado grande (máx 10MB)" });
     }
-    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-      return res.status(400).json({ message: 'Demasiados ficheiros (máx 10)' });
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      return res.status(400).json({ message: "Demasiados ficheiros (máx 5)" });
     }
     return res.status(400).json({ message: err.message });
   }
@@ -91,17 +52,45 @@ const createAnswerHandler = async (req, res) => {
       }
     }
 
-    // Processar ficheiros carregados
+    // Processar ficheiros carregados - upload para Cloudinary
     const attachments = [];
     if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        const folder = file.mimetype.startsWith('image/') ? 'images' : 'pdfs';
-        attachments.push({
-          url: `/uploads/answers/${folder}/${file.filename}`,
-          type: file.mimetype.startsWith('image/') ? 'image' : 'pdf',
-          filename: file.originalname
+      console.log(`📤 Processando ${req.files.length} ficheiro(s) para Cloudinary (resposta)...`);
+      try {
+        for (const file of req.files) {
+          console.log(`  → Fazendo upload: ${file.originalname} (${file.mimetype}, ${file.size} bytes)`);
+          
+          if (!file.buffer) {
+            console.error(`  ✗ Erro: Buffer vazio para ${file.originalname}`);
+            continue;
+          }
+
+          const uploadResult = await uploadBufferToCloudinary(file.buffer, {
+            filename: file.originalname,
+          });
+
+          console.log(`  ✓ Upload concluído: ${uploadResult.url}`);
+
+          // Inferir type
+          const type = file.mimetype.startsWith("image/") ? "image" : "pdf";
+
+          attachments.push({
+            url: uploadResult.url, // URL completo do Cloudinary
+            publicId: uploadResult.publicId,
+            type: type,
+            filename: uploadResult.originalFilename,
+            size: uploadResult.bytes,
+            createdAt: new Date(),
+          });
+        }
+        console.log(`✓ Total de ${attachments.length} anexo(s) processado(s)`);
+      } catch (uploadError) {
+        console.error("❌ Erro ao fazer upload para Cloudinary:", uploadError);
+        console.error("   Detalhes:", uploadError.message, uploadError.stack);
+        return res.status(500).json({
+          message: `Erro ao fazer upload dos anexos: ${uploadError.message || "Erro desconhecido"}`,
         });
-      });
+      }
     }
 
     const answer = new Answer({
@@ -171,9 +160,9 @@ const createAnswerHandler = async (req, res) => {
 };
 
 exports.createAnswer = [
-  upload.array('attachments', 10),
+  uploadAttachments.array("attachments", 5),
   handleMulterError,
-  createAnswerHandler
+  createAnswerHandler,
 ];
 
 // ==============================
