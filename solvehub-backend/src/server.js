@@ -8,17 +8,15 @@ const app = require("./app");
 
 const PORT = process.env.PORT || 5050;
 
-// Criar servidor HTTP
 const server = http.createServer(app);
 
-// Configurar Socket.IO com CORS dinâmico
 const allowedSocketOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(",").map(origin => origin.trim())
   : [
       "http://localhost:5500",
       "http://127.0.0.1:5500",
       "http://localhost:3000",
-      "http://localhost:5173", // Vite default
+      "http://localhost:5173",
       "http://localhost:8080"
     ];
 
@@ -29,7 +27,6 @@ const io = new Server(server, {
   },
 });
 
-// Middleware de autenticação para Socket.IO
 io.use(async (socket, next) => {
   try {
     const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(" ")[1];
@@ -52,14 +49,10 @@ io.use(async (socket, next) => {
   }
 });
 
-// Conexão Socket.IO
 io.on("connection", (socket) => {
   console.log(`Utilizador conectado: ${socket.userId}`);
-
-  // Associar utilizador a uma room
   socket.join(`user:${socket.userId}`);
 
-  // Evento para juntar-se a uma room de exercício
   socket.on("joinExercise", (data) => {
     const { exerciseId } = data;
     if (exerciseId) {
@@ -68,7 +61,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Evento para sair de uma room de exercício
   socket.on("leaveExercise", (data) => {
     const { exerciseId } = data;
     if (exerciseId) {
@@ -82,7 +74,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// Tornar io disponível globalmente
 app.set("io", io);
 
 server.listen(PORT, "0.0.0.0", () => {

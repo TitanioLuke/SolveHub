@@ -1,5 +1,3 @@
-// API_URL é definido em config.js
-// Se config.js não foi carregado, usar fallback para desenvolvimento local
 const API_URL = window.API_URL || "http://localhost:5050";
 
 // ===============================

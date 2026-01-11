@@ -87,9 +87,7 @@ async function deleteAttachment(attachment) {
       }
     }
 
-    // Se é URL local (não começa com http/https), tentar apagar ficheiro local
     if (attachment.url && !attachment.url.startsWith("http")) {
-      // Remover prefixo /uploads se existir
       const filePath = attachment.url.startsWith("/uploads")
         ? path.join(__dirname, "..", "..", attachment.url)
         : attachment.url;
@@ -100,7 +98,6 @@ async function deleteAttachment(attachment) {
         }
       } catch (error) {
         console.error(`Erro ao apagar ficheiro local (${filePath}):`, error);
-        // Não falhar se erro ao apagar ficheiro - apenas logar
       }
     }
   } catch (error) {

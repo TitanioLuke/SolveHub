@@ -19,8 +19,6 @@ const ReportSchema = new mongoose.Schema(
     exerciseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Exercise",
-      // Para reports de exercícios, será o mesmo que targetId
-      // Para reports de comentários, será o exercício relacionado
     },
     reason: {
       type: String,

@@ -23,18 +23,15 @@ async function loadSubjectsInSidebar() {
   if (!container) return;
 
   try {
-    // Carregar apenas disciplinas populares para o sidemenu
     const popularSubjects = await apiGet("/subjects?popular=true");
     console.log("Disciplinas populares carregadas para sidemenu:", popularSubjects);
     
     if (window.renderSubjectTags) {
       window.renderSubjectTags(container, popularSubjects, (subjectId, subjectName) => {
         console.log("Disciplina clicada:", subjectName, subjectId);
-        // Redirecionar para explorar com filtro de disciplina
         window.location.href = `explore.html?subject=${encodeURIComponent(subjectName)}`;
       });
     } else {
-      // Fallback se renderSubjectTags não estiver disponível
       if (popularSubjects && popularSubjects.length > 0) {
         container.innerHTML = popularSubjects.map(subject => {
           const subjectId = subject._id || subject.id;

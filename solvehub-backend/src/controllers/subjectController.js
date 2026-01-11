@@ -9,14 +9,13 @@ exports.getSubjects = async (req, res) => {
     
     let query = Subject.find();
     
-    // Se popular=true, filtrar apenas disciplinas populares
     if (popular === "true") {
       query = query.where({ isPopular: true });
     }
     
     const subjects = await query
       .select("_id name slug isPopular")
-      .sort({ name: 1 }); // Ordenar por nome ascendente
+      .sort({ name: 1 });
 
     res.json(subjects);
   } catch (error) {

@@ -21,14 +21,12 @@ async function createNotification(
   relatedAnswerId = null
 ) {
   try {
-    // Verificar preferências do utilizador
     const user = await User.findById(userId).select("notificationSettings");
     if (!user) {
       console.error("Utilizador não encontrado para notificação:", userId);
       return null;
     }
 
-    // Verificar se a notificação está permitida pelas preferências
     const settings = user.notificationSettings || {
       exerciseReplies: true,
       commentReplies: true,
@@ -46,7 +44,6 @@ async function createNotification(
     }
 
     if (!shouldNotify) {
-      // Não criar notificação se a preferência estiver desativada
       return null;
     }
 
@@ -61,7 +58,6 @@ async function createNotification(
 
     await notification.save();
 
-    // Emitir via socket para o utilizador específico
     if (io) {
       io.to(`user:${userId}`).emit("notification:new", notification);
     }

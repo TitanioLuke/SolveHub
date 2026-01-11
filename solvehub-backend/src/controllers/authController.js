@@ -113,49 +113,37 @@ exports.uploadAvatar = async (req, res) => {
       return res.status(400).json({ message: "Nenhuma imagem enviada" });
     }
 
-    // Buscar utilizador atual para apagar avatar antigo se existir
     const currentUser = await User.findById(req.user.id);
     
-    // Fazer upload para Cloudinary
     console.log(`📤 Fazendo upload de avatar para Cloudinary: ${req.file.originalname}`);
     const uploadResult = await uploadBufferToCloudinary(req.file.buffer, {
       filename: `avatar-${req.user.id}`,
-      folder: `${process.env.CLOUDINARY_FOLDER || "solvehub"}/avatars`, // Pasta específica para avatares
+      folder: `${process.env.CLOUDINARY_FOLDER || "solvehub"}/avatars`,
     });
 
     console.log(`✓ Avatar carregado: ${uploadResult.url}`);
 
-    // Apagar avatar antigo do Cloudinary se existir
     if (currentUser.avatar) {
-      // Verificar se o avatar antigo está no Cloudinary (URL começa com https://res.cloudinary.com)
       if (currentUser.avatar.startsWith("https://res.cloudinary.com") || currentUser.avatar.includes("cloudinary.com")) {
-        // Extrair publicId da URL do Cloudinary
-        // Formato: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{folder}/{public_id}.{format}
         try {
           const url = currentUser.avatar;
-          // Encontrar "upload/" na URL e pegar tudo depois
           const uploadIndex = url.indexOf("/upload/");
           if (uploadIndex !== -1) {
             const afterUpload = url.substring(uploadIndex + "/upload/".length);
-            // Remover parâmetros de query e fragmentos
             const publicIdWithExt = afterUpload.split("?")[0].split("#")[0];
-            // Remover extensão
             const publicId = publicIdWithExt.replace(/\.[^/.]+$/, "");
-            
             await deleteAttachment({ publicId, url: currentUser.avatar });
             console.log(`✓ Avatar antigo removido do Cloudinary (${publicId})`);
           }
         } catch (deleteError) {
           console.error("Erro ao apagar avatar antigo do Cloudinary:", deleteError);
-          // Não falhar se não conseguir apagar o avatar antigo
         }
       }
     }
 
-    // Atualizar utilizador com nova URL do Cloudinary
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { avatar: uploadResult.url }, // URL completo do Cloudinary
+      { avatar: uploadResult.url },
       { new: true }
     ).select("-password");
 
@@ -173,40 +161,32 @@ exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    // Validar campos obrigatórios
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ message: "Palavra-passe atual e nova palavra-passe são obrigatórias" });
     }
 
-    // Validar tamanho mínimo
     if (newPassword.length < 8) {
       return res.status(400).json({ message: "A nova palavra-passe deve ter pelo menos 8 caracteres" });
     }
 
-    // Buscar utilizador (com password para comparação)
     const userId = req.user._id || req.user.id;
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "Utilizador não encontrado" });
     }
 
-    // Verificar palavra-passe atual
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
       return res.status(401).json({ message: "Palavra-passe atual incorreta" });
     }
 
-    // Verificar que a nova palavra-passe é diferente da atual
     const isSamePassword = await bcrypt.compare(newPassword, user.password);
     if (isSamePassword) {
       return res.status(400).json({ message: "A nova palavra-passe deve ser diferente da atual" });
     }
 
-    // Hash da nova palavra-passe
     const saltRounds = 10;
     const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
-
-    // Atualizar palavra-passe
     user.password = newPasswordHash;
     await user.save();
 

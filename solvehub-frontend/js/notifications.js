@@ -22,7 +22,6 @@ async function initNotifications() {
 
   console.log("🔔 Inicializando sistema de notificações...");
 
-  // Setup dropdown primeiro (para garantir que o HTML existe)
   setupNotificationsDropdown();
 
   // Carregar notificações iniciais
@@ -144,7 +143,6 @@ function setupNotificationsDropdown() {
 
   console.log("✅ Setup do dropdown de notificações iniciado");
 
-  // Toggle dropdown - usar event delegation para evitar problemas
   bellBtn.onclick = function(e) {
     e.stopPropagation();
     e.preventDefault();
