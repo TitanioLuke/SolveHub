@@ -117,6 +117,3 @@ SolveHub/
     └── *.html            # Páginas
 ```
 
-## 📝 Licença
-
-ISC
