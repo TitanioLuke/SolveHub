@@ -135,6 +135,80 @@ body:has(.auth-container) {
     color: var(--text-muted);
 }
 
+/* ===============================
+   ISOLAR DO TEMA ESCURO
+================================ */
+/* Garantir que as páginas de autenticação sempre usam tema claro */
+/* Redefinir variáveis CSS para forçar tema claro (variáveis CSS não suportam !important) */
+body:has(.auth-container),
+body:has(.auth-container) .auth-container,
+body:has(.auth-container) .auth-container * {
+    --text: #111827;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --primary: #2563eb;
+}
+
+/* Garantir que o tema escuro não afete páginas de autenticação */
+[data-theme="dark"] body:has(.auth-container),
+[data-theme="dark"] body:has(.auth-container) .auth-container,
+[data-theme="dark"] body:has(.auth-container) .auth-container * {
+    --text: #111827;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --primary: #2563eb;
+}
+
+/* Forçar cores diretas em elementos críticos (backup para garantir funcionamento) */
+.auth-container .form-header h2 {
+    color: #111827 !important;
+}
+
+.auth-container .form-subtitle {
+    color: #6b7280 !important;
+}
+
+.auth-container .input-group label {
+    color: #111827 !important;
+}
+
+.auth-container .input-group input {
+    background: white !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+}
+
+.auth-container .input-group input::placeholder {
+    color: #6b7280 !important;
+}
+
+.auth-container .password-wrapper input {
+    background: white !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+}
+
+.auth-container .password-wrapper input::placeholder {
+    color: #6b7280 !important;
+}
+
+.auth-container .password-validation {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+.auth-container .switch-text {
+    color: #6b7280 !important;
+}
+
+.auth-container .form-box {
+    background: white !important;
+}
+
+.auth-container .side.form-bg {
+    background: white !important;
+}
+
 .form-content {
     display: flex;
     flex-direction: column;

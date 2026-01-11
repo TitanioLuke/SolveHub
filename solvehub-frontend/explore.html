@@ -17,6 +17,18 @@
 
     <!-- Theme System (carregar primeiro para evitar flash) -->
     <script src="./js/theme.js" defer></script>
+
+    <!-- Verificação de autenticação antes de renderizar (evita flash) -->
+    <script>
+        // Verificar autenticação imediatamente, antes de qualquer renderização
+        (function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.replace('auth.html');
+            }
+        })();
+    </script>
+
 </head>
 <body>
 
