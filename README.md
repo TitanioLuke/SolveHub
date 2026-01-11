@@ -2,7 +2,7 @@
 
 Plataforma colaborativa para resolução de exercícios académicos, onde estudantes podem partilhar, resolver e discutir exercícios em comunidade.
 
-## 🚀 Stack Tecnológica
+## Stack Tecnológica
 
 ### Backend
 - **Node.js** + **Express.js** - Servidor REST API
@@ -22,20 +22,20 @@ Plataforma colaborativa para resolução de exercícios académicos, onde estuda
 - **Base de Dados**: MongoDB Atlas
 - **Ficheiros**: Cloudinary
 
-## ✨ Funcionalidades
+## Funcionalidades
 
-- 🔐 **Autenticação** - Registo e login com JWT
-- 📝 **Exercícios** - Criar, editar e publicar exercícios
-- 💬 **Comentários** - Sistema de comentários e respostas
-- ⭐ **Votação** - Like/dislike em exercícios e respostas
-- 🔔 **Notificações** - Notificações em tempo real via WebSocket
-- 📚 **Disciplinas** - Organização por disciplinas académicas
-- 💾 **Guardar** - Guardar exercícios favoritos
-- 👤 **Perfil** - Gestão de perfil e avatar
-- 🛡️ **Admin** - Painel de administração
-- 🎨 **Tema** - Modo claro/escuro
+- **Autenticação** - Registo e login com JWT
+- **Exercícios** - Criar, editar e publicar exercícios
+- **Comentários** - Sistema de comentários e respostas
+- **Votação** - Like/dislike em exercícios e respostas
+- **Notificações** - Notificações em tempo real via WebSocket
+- **Disciplinas** - Organização por disciplinas académicas
+- **Guardar** - Guardar exercícios favoritos
+- **Perfil** - Gestão de perfil e avatar
+- **Admin** - Painel de administração
+- **Tema** - Modo claro/escuro
 
-## 🛠️ Instalação Local
+## Instalação Local
 
 ### Pré-requisitos
 - Node.js (v18+)
@@ -51,7 +51,7 @@ npm install
 
 Criar ficheiro `.env`:
 ```env
-MONGO_URI=mongodb://localhost:27017/solvehub
+MONGO_URI=mongodb://<host>:<port>/<database_name>
 JWT_SECRET=seu_secret_aqui
 PORT=5050
 CORS_ORIGINS=http://localhost:5500
@@ -76,7 +76,7 @@ python -m http.server 5500
 
 Aceder a `http://localhost:5500`
 
-## 📦 Deploy
+## Deploy
 
 ### Backend (Render)
 1. Conectar repositório
@@ -90,7 +90,7 @@ Aceder a `http://localhost:5500`
 3. Build command: (vazio)
 4. Output directory: (vazio)
 
-## 🌐 Produção
+## 🌐Produção
 
 - **Frontend**: [https://solvehub.tech](https://solvehub.tech)
 - **Backend**: [https://solvehub.onrender.com](https://solvehub.onrender.com)
