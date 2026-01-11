@@ -2188,7 +2188,9 @@ function setupExerciseSocket() {
   }
 
   // Conectar socket para o exercício
-  exerciseSocket = io("http://localhost:5050", {
+  // SOCKET_URL é definido em config.js
+  const socketUrl = window.SOCKET_URL || "http://localhost:5050";
+  exerciseSocket = io(socketUrl, {
     auth: {
       token: token,
     },

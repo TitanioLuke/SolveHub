@@ -16,7 +16,9 @@ const toLogin = document.getElementById("toLogin");
 const loginError = document.getElementById("loginError");
 const registerError = document.getElementById("registerError");
 
-const API_URL = "http://localhost:5050";
+// API_URL é definido em config.js
+// Se config.js não foi carregado, usar fallback para desenvolvimento local
+const API_URL = window.API_URL || "http://localhost:5050";
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Validation flags

@@ -41,7 +41,7 @@ function updateAvatar(user) {
     const avatarLarge = document.querySelector('.avatar-large');
 
     if (user.avatar) {
-        const img = `<img src="${typeof resolveUrl !== 'undefined' ? resolveUrl(user.avatar) : (typeof API_URL !== 'undefined' ? API_URL + user.avatar : 'http://localhost:5050' + user.avatar)}" />`;
+        const img = `<img src="${typeof resolveUrl !== 'undefined' ? resolveUrl(user.avatar) : ((window.API_URL || 'http://localhost:5050') + user.avatar)}" />`;
         if (avatar) avatar.innerHTML = img;
         if (avatarLarge) avatarLarge.innerHTML = img;
         return;
@@ -89,18 +89,25 @@ if (profileSection) {
             saveBtn.disabled = true;
 
             try {
-                const res = await fetch("http://localhost:5050/auth/me", {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("token")}`
-                    },
-                    body: JSON.stringify({ username, email, bio })
-                });
+                // Usar apiPut se disponível, caso contrário usar fetch com API_URL
+                let user;
+                if (typeof apiPut !== 'undefined') {
+                    user = await apiPut("/auth/me", { username, email, bio });
+                } else {
+                    const apiUrl = window.API_URL || 'http://localhost:5050';
+                    const res = await fetch(`${apiUrl}/auth/me`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${localStorage.getItem("token")}`
+                        },
+                        body: JSON.stringify({ username, email, bio })
+                    });
 
-                if (!res.ok) throw new Error();
+                    if (!res.ok) throw new Error();
+                    user = await res.json();
+                }
 
-                const user = await res.json();
                 localStorage.setItem('user', JSON.stringify(user));
 
                 const profileName = document.querySelector('.profile-name');
@@ -161,7 +168,7 @@ if (avatarBtn) {
         formData.append('avatar', fileInput.files[0]);
 
         try {
-            const apiUrl = typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:5050';
+            const apiUrl = window.API_URL || 'http://localhost:5050';
             const res = await fetch(`${apiUrl}/auth/me/avatar`, {
                 method: "POST",
                 headers: {
@@ -617,23 +624,30 @@ async function loadUserFromAPI() {
     }
 
     try {
-        const res = await fetch('http://localhost:5050/auth/me', {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        // Usar apiGet se disponível, caso contrário usar fetch com API_URL
+        let user;
+        if (typeof apiGet !== 'undefined') {
+            user = await apiGet('/auth/me');
+        } else {
+            const apiUrl = window.API_URL || 'http://localhost:5050';
+            const res = await fetch(`${apiUrl}/auth/me`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
-        if (!res.ok) {
-            if (res.status === 401 || res.status === 403) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'auth.html';
-                return;
+            if (!res.ok) {
+                if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                throw new Error('Erro ao carregar utilizador');
             }
-            throw new Error('Erro ao carregar utilizador');
+
+            user = await res.json();
         }
-
-        const user = await res.json();
         localStorage.setItem('user', JSON.stringify(user));
         loadUserData();
 

@@ -182,23 +182,29 @@ form.addEventListener('submit', async (e) => {
   messageEl.className = 'form-message';
 
   try {
-    const token = localStorage.getItem('token');
+    // Usar apiPostFormData se disponível, caso contrário usar fetch com API_URL
+    let created;
+    if (typeof apiPostFormData !== 'undefined') {
+      created = await apiPostFormData('/exercises', formData);
+    } else {
+      const apiUrl = window.API_URL || 'http://localhost:5050';
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${apiUrl}/exercises`, {
+        method: 'POST',
+        headers: {
+          Authorization: token ? `Bearer ${token}` : ''
+          // NÃO colocar Content-Type aqui - o browser define automaticamente
+        },
+        body: formData
+      });
 
-    const res = await fetch('http://localhost:5050/exercises', {
-      method: 'POST',
-      headers: {
-        Authorization: token ? `Bearer ${token}` : ''
-        // NÃO colocar Content-Type aqui - o browser define automaticamente
-      },
-      body: formData
-    });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || 'Erro ao criar exercício');
+      }
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || 'Erro ao criar exercício');
+      created = await res.json();
     }
-
-    const created = await res.json();
     console.log('Exercício criado COM FOTOS:', created);
 
     // Toast de sucesso

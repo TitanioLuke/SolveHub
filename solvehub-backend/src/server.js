@@ -11,14 +11,20 @@ const PORT = process.env.PORT || 5050;
 // Criar servidor HTTP
 const server = http.createServer(app);
 
-// Configurar Socket.IO
-const io = new Server(server, {
-  cors: {
-    origin: [
+// Configurar Socket.IO com CORS dinâmico
+const allowedSocketOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",").map(origin => origin.trim())
+  : [
       "http://localhost:5500",
       "http://127.0.0.1:5500",
       "http://localhost:3000",
-    ],
+      "http://localhost:5173", // Vite default
+      "http://localhost:8080"
+    ];
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedSocketOrigins,
     credentials: true,
   },
 });
@@ -79,7 +85,8 @@ io.on("connection", (socket) => {
 // Tornar io disponível globalmente
 app.set("io", io);
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log("🚀 Servidor a correr na porta", PORT);
   console.log("📡 WebSocket ativo");
+  console.log(`🌐 Ambiente: ${process.env.NODE_ENV || "development"}`);
 });

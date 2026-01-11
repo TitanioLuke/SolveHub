@@ -2,7 +2,8 @@
 //  NOTIFICATIONS MODULE
 // ===============================
 // API_URL já está definido em api.js, não redeclarar
-const SOCKET_URL = "http://localhost:5050";
+// SOCKET_URL é definido em config.js
+const SOCKET_URL = window.SOCKET_URL || "http://localhost:5050";
 
 let socket = null;
 let notifications = [];
